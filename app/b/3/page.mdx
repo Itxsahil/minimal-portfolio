@@ -1,0 +1,161 @@
+export const metadata = {
+  title: "6 CSS Patterns to Cut Boilerplate",
+  alternates: {
+    canonical: "/n/3",
+  },
+};
+
+# JavaScript Array Methods
+
+In JavaScript, arrays are powerful data structures that allow you to store multiple values in a single variable. What makes arrays even more useful are the **array methods**—built-in functions that simplify common tasks like transforming, filtering, or aggregating data.
+
+In this blog, we’ll explore how core array methods such as `map`, `filter`, `reduce`, and `forEach` work, and more importantly, how you can **implement them yourself** using JavaScript’s `Array.prototype`.
+
+---
+
+## `map()`
+
+The `map()` method iterates over an array and returns a **new array**, where each element is the result of a transformation specified in a callback function.
+
+### Built-in `map()` Example
+
+```js
+const myArray = [1, 2, 3, 4, 5];
+
+const newArray = myArray.map((element, index, arrayRef) => element * index);
+console.log(newArray); // [0, 2, 6, 12, 20]
+```
+
+### Custom `map()` Implementation
+
+Now, let’s implement our own version of the `map` method:
+
+```js
+const myArray = [1, 2, 3, 4, 5];
+
+Array.prototype.myMap = function (callback) {
+  const result = [];
+  for (let i = 0; i < this.length; i++) {
+    result.push(callback(this[i], i, this));
+  }
+  return result;
+};
+
+// Using our custom method
+const newArray = myArray.myMap((element, index, arr) => element * index);
+console.log(newArray); // [0, 2, 6, 12, 20]
+```
+
+**Explanation**:
+We add a method `myMap` to the global `Array.prototype`, which makes it available to all arrays. This method uses a `for` loop and calls the callback function for each element, then pushes the returned value into a new array.
+
+---
+
+## `filter()`
+
+The `filter()` method creates a **new array** with elements that satisfy a provided condition.
+
+### Built-in `filter()` Example
+
+```js
+const myArray = [1, 2, 3, 4, 5];
+const filtered = myArray.filter((el) => el > 4);
+console.log(filtered); // [5]
+```
+
+### Custom `filter()` Implementation
+
+```js
+Array.prototype.myFilter = function (callback) {
+  const result = [];
+  for (let i = 0; i < this.length; i++) {
+    if (callback(this[i], i, this)) {
+      result.push(this[i]);
+    }
+  }
+  return result;
+};
+
+const myArray = [1, 2, 3, 4, 5];
+const filtered = myArray.myFilter((el) => el > 4);
+console.log(filtered); // [5]
+```
+
+**Explanation**:
+Here, `myFilter` evaluates each element using the callback function. If the callback returns `true`, the element is added to the new array.
+
+---
+
+## `reduce()`
+
+The `reduce()` method executes a reducer function on each element of the array, resulting in a **single accumulated value**.
+
+### Built-in `reduce()` Example
+
+```js
+const numbers = [1, 2, 3, 4];
+const sum = numbers.reduce((acc, curr) => acc + curr, 0);
+console.log(sum); // 10
+```
+
+### Custom `reduce()` Implementation
+
+```js
+Array.prototype.myReduce = function (callback, initialValue) {
+  let accumulator = initialValue !== undefined ? initialValue : this[0];
+  let startIdx = initialValue !== undefined ? 0 : 1;
+
+  for (let i = startIdx; i < this.length; i++) {
+    accumulator = callback(accumulator, this[i], i, this);
+  }
+  return accumulator;
+};
+
+const numbers = [1, 2, 3, 4];
+const sum = numbers.myReduce((acc, curr) => acc + curr, 0);
+console.log(sum); // 10
+```
+
+**Explanation**:
+We handle the optional `initialValue` carefully. If it's not provided, we use the first element of the array as the starting value, and begin iteration from the second element.
+
+---
+
+## `forEach()`
+
+The `forEach()` method is used to execute a given function once for each element in the array. It **does not return anything**.
+
+### Built-in `forEach()` Example
+
+```js
+const numbers = [1, 2, 3, 4];
+numbers.forEach((num) => {
+  console.log(num % 2 === 0 ? "even" : "odd");
+});
+```
+
+### Custom `forEach()` Implementation
+
+```js
+Array.prototype.myForEach = function (callback) {
+  for (let i = 0; i < this.length; i++) {
+    callback(this[i], i, this);
+  }
+};
+
+const numbers = [1, 2, 3, 4];
+numbers.myForEach((num) => {
+  console.log(num % 2 === 0 ? "even" : "odd");
+});
+```
+
+**Explanation**:
+`myForEach` simply iterates over the array and applies the callback function to each element. It doesn't store or return any result.
+
+---
+
+## Final Thoughts 💡
+
+By recreating these array methods manually, you get a deeper understanding of how JavaScript arrays work under the hood. You can also extend this approach to create your own custom methods.
+
+> 💬 _Pro Tip:_ Extending `Array.prototype` should be done with caution. While it's powerful, modifying built-in objects globally can lead to unexpected behavior in larger applications or when using third-party libraries.
