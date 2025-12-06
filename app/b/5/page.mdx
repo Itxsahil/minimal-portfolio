@@ -1,0 +1,311 @@
+export const metadata = {
+  title: "Understanding WebRTC — Real-Time Communication in the Browser",
+  alternates: {
+    canonical: "/b/5",
+  },
+  description:
+    "A deep dive into WebRTC, covering NAT traversal, STUN, TURN, ICE, SDP, and how browsers connect peer-to-peer without servers.",
+};
+
+# WebRTC: A Complete Guide
+
+<p className="text-sm text-gray-400 dark:text-gray-500 mb-8 font-mono">
+  Sep 27, 2025
+</p>
+
+## Table of Contents
+
+- Overview
+- WebRTC Demystified
+
+  - NAT
+  - STUN
+  - TURN
+  - ICE
+  - SDP & Signaling
+
+- Demo
+- Pros and Cons
+
+---
+
+## Overview
+
+So why was WebRTC even created?
+
+We built it because we wanted to transmit real-time media (audio, video, and even data) between browsers in a **low-latency, standardized way**.
+
+- By **standardized**, we mean an API that is simple and consistent across browsers.
+- By **low latency**, we mean a protocol designed to minimize delay, and that’s why WebRTC is built on top of **UDP**.
+
+Why not just use a server?
+Because relying on a central server adds unnecessary latency. Data would have to travel:
+
+`Client A → Server → Client B`
+
+and back again.
+
+Instead, with WebRTC, clients can talk **directly to each other** (peer-to-peer).
+
+---
+
+### A simple scenario
+
+Imagine `X` wants to connect to `Y`. Neither knows anything about the other’s network setup.
+
+1. **Gather information**:
+   Each peer first collects all possible ways they might be reachable on the internet (public IPs, ports, candidate addresses, etc.).
+
+2. **Exchange information**:
+   This is called **signaling**. WebRTC itself does not care _how_ this exchange happens. It could be via WhatsApp, Telegram, Instagram, WebSocket, or even manual copy-paste.
+
+   - `X` shares his connection info with `Y`.
+   - `Y` does the same for `X`.
+
+3. **Find the best path**:
+   After exchanging, they negotiate the shortest, most optimal path for direct communication.
+
+And finally, `X` and `Y` connect directly.
+
+![WebRTC signaling](https://ik.imagekit.io/sahildotdev/blogs/image.png?updatedAt=1758976341128)
+
+---
+
+## WebRTC Demystified
+
+To truly understand WebRTC, we need to break down the core networking concepts behind it.
+
+### NAT (Network Address Translation)
+
+If you have a **public IP address**, life is easy. You can listen on a port, share your public IP + port with someone, and they connect directly. That’s exactly what happens when you spin up a cloud server (like an AWS EC2 instance).
+
+But most of us are not that lucky. Almost everyone is **behind a NAT**.
+
+- Your device (laptop, phone, etc.) has a **private IP address** (e.g., `192.168.0.10` or `10.0.0.5`).
+- Your router has a **public IP address** (e.g., `3.3.3.3`).
+- When you try to connect to another device on the internet (say `4.4.4.4:80`), your router translates your private IP into its public IP.
+
+This translation is called **NAT**.
+
+The problem:
+If someone outside wants to connect to _you_, they don’t know your private IP. They only see your router’s public IP. Unless your router explicitly forwards the traffic to your device (port forwarding), the connection will fail.
+
+This is where **STUN, TURN, and ICE** come in.
+
+---
+
+### STUN (Session Traversal Utilities for NAT)
+
+STUN servers help a peer discover its **public-facing IP and port**.
+
+- Your client asks a STUN server: “Hey, what’s my public IP and port?”
+- The STUN server replies with something like: `3.3.3.3:59723`.
+
+Now you know how you appear to the outside world.
+
+But NATs are tricky. Sometimes the mapping changes, or inbound connections aren’t allowed. That’s when you need something stronger.
+
+---
+
+### TURN (Traversal Using Relays around NAT)
+
+If peers cannot connect directly (for example, due to strict NATs or firewalls), they fall back to using a **TURN server**.
+
+A TURN server acts as a **relay**:
+
+`X → TURN → Y`
+
+This ensures the connection works, but at the cost of extra latency and bandwidth usage (since the media flows through the server).
+
+---
+
+### ICE (Interactive Connectivity Establishment)
+
+ICE is the framework that WebRTC uses to figure out the best possible connection path.
+
+1. Each peer collects **candidates** (possible connection endpoints) from:
+
+   - Local interfaces
+   - STUN (public mapping)
+   - TURN (relay)
+
+2. They exchange these candidates via signaling.
+
+3. They test different paths and select the most efficient one (lowest latency, direct if possible).
+
+So ICE is basically the brain that coordinates NAT traversal.
+
+---
+
+### SDP & Signaling
+
+Once peers know **how** to connect, they still need to agree on **what** to exchange and in what format.
+
+This is where **SDP (Session Description Protocol)** comes in.
+
+- An **offer** (from `X`) describes supported codecs, media types (audio, video, data), and candidate addresses.
+- An **answer** (from `Y`) accepts or adjusts these.
+
+The exchange of SDP messages is done via **signaling** (remember: WebRTC doesn’t dictate how).
+
+---
+
+## Demo: WebRTC in the Browser Console
+
+For this demo, we won’t create any HTML or JS files. Instead, we’ll use the **browser developer console** in two separate tabs or windows. One will act as **Client 1**, and the other as **Client 2**.
+
+---
+
+### Client 1 (Initiator)
+
+Open the console in the first browser tab and run:
+
+```js
+// Create a local peer connection
+const lc = new RTCPeerConnection();
+
+// Create a data channel (this is how we'll communicate)
+const dc = lc.createDataChannel("channel");
+
+// Listen for events on the data channel
+dc.onopen = () => console.log("Client 1: Data channel open!");
+dc.onmessage = (e) => console.log("Client 1 received:", e.data);
+
+// Whenever a new ICE candidate is found, print the updated SDP
+lc.onicecandidate = () =>
+  console.log(
+    "Client 1 SDP (copy this to Client 2):",
+    JSON.stringify(lc.localDescription)
+  );
+
+// Create and set the local offer
+lc.createOffer()
+  .then((offer) => lc.setLocalDescription(offer))
+  .then(() => console.log("Client 1: Offer created and set!"));
+```
+
+At this point, you’ll see a JSON object logged in the console that looks like:
+
+```json
+{ "type": "offer", "sdp": "v=0..." }
+```
+
+Copy that JSON (the whole object) — you’ll need it for Client 2.
+
+---
+
+### Client 2 (Receiver)
+
+Open the console in the second browser tab and run:
+
+```js
+// Paste the offer from Client 1 here:
+const offer = { type: "offer", sdp: "..." };
+
+// Create a remote peer connection
+const rc = new RTCPeerConnection();
+
+// Handle ICE candidates
+rc.onicecandidate = () =>
+  console.log(
+    "Client 2 SDP (copy this to Client 1):",
+    JSON.stringify(rc.localDescription)
+  );
+
+// Handle the incoming data channel
+rc.ondatachannel = (e) => {
+  rc.dc = e.channel;
+  rc.dc.onopen = () => console.log("Client 2: Data channel open!");
+  rc.dc.onmessage = (e) => console.log("Client 2 received:", e.data);
+};
+
+// Set the remote offer, then create and set an answer
+rc.setRemoteDescription(offer)
+  .then(() => rc.createAnswer())
+  .then((answer) => rc.setLocalDescription(answer))
+  .then(() => console.log("Client 2: Answer created and set!"));
+```
+
+Now you’ll see another JSON object in Client 2’s console that looks like:
+
+```json
+{ "type": "answer", "sdp": "v=0..." }
+```
+
+Copy that JSON and bring it back to Client 1.
+
+---
+
+### Back to Client 1
+
+In Client 1’s console, paste the answer:
+
+```js
+// Paste the answer from Client 2 here:
+const answer = { type: "answer", sdp: "..." };
+
+// Apply it to Client 1's connection
+lc.setRemoteDescription(answer).then(() =>
+  console.log("Client 1: Remote description set!")
+);
+```
+
+At this point, both clients should log **“Data channel open!”**
+
+---
+
+### Sending Messages
+
+Now you can send messages between the two clients!
+
+From **Client 1**:
+
+```js
+dc.send("Hello from Client 1!");
+```
+
+From **Client 2**:
+
+```js
+rc.dc.send("Hi Client 1, this is Client 2!");
+```
+
+Each side will see the messages appear in its console. 🎉
+
+---
+
+## Recap
+
+- Client 1 creates an **offer** and sends it to Client 2.
+- Client 2 accepts the offer, creates an **answer**, and sends it back.
+- Both sides exchange ICE candidates automatically.
+- Once the data channel is open, they can send messages back and forth.
+
+This is the **simplest possible WebRTC example** you can run directly in your browser console.
+
+## Pros and Cons
+
+### ✅ Pros
+
+- Peer-to-peer = low latency
+- Built-in support in major browsers
+- Secure by default (SRTP/DTLS)
+- No plugins required
+- Great for real-time audio, video, and data
+
+### ❌ Cons
+
+- NAT traversal is complex, doesn’t always work perfectly
+- TURN fallback adds server cost and latency
+- Limited browser support on older devices
+- Debugging connections can be tricky
+
+---
+
+## Final Thoughts
+
+WebRTC is powerful because it enables **direct, real-time communication** between browsers without needing plugins or heavy server infrastructure.
+
+But it’s not magic—it’s built on a stack of clever networking techniques (NAT traversal, STUN, TURN, ICE, SDP, signaling).
+
+Once you understand those building blocks, WebRTC stops feeling mysterious and starts feeling like an elegant engineering solution.

@@ -1,0 +1,197 @@
+export const metadata = {
+  title: "Unlocking Metaprogramming in JavaScript: Proxies and Reflect",
+  alternates: {
+    canonical: "/b/4",
+  },
+  description: "Unlocking Metaprogramming in JavaScript: Proxies and Reflect",
+};
+
+# Unlocking Metaprogramming in JavaScript: Proxies and Reflect
+
+<p className="text-sm text-gray-400 dark:text-gray-500 mb-8 font-mono">
+  May 25, 2025
+</p>
+
+Welcome back to the blog! Today, we're diving into two powerful features introduced in ES6 (ECMAScript 2015) that unlock a new level of control and flexibility in JavaScript: **`Proxy`** and **`Reflect`**.
+
+If you've ever wanted to intercept and customize fundamental operations for objects—like reading or writing properties—you're in the right place.
+
+## What is Metaprogramming?
+
+Before we jump into `Proxy` and `Reflect`, let’s briefly touch upon **metaprogramming**.
+
+> Metaprogramming is the practice of writing code that can inspect, modify, or control the behavior of other code.
+
+In JavaScript, this typically means interacting with objects at a deeper level—customizing how they behave when accessed, mutated, or even defined.
+
+---
+
+## The Power of JavaScript Proxies
+
+Think of a `Proxy` as a wrapper around an object. When you interact with the proxy, it intercepts those operations and allows you to define custom behavior for them.
+
+### Common Use Cases
+
+- ✅ **Validation** – Enforce rules before modifying object properties.
+- 🔍 **Logging** – Track reads and writes on properties.
+- 🔐 **Access Control** – Restrict access to private data.
+- ✨ **Virtual Properties** – Dynamically computed values.
+
+---
+
+## Creating a Proxy
+
+A `Proxy` takes two arguments:
+
+1. The `target` object (the original object).
+2. The `handler` object (an object containing "trap" methods).
+
+Let’s start with a simple example.
+
+```javascript
+const target = {
+  name: "Sahil",
+  age: 21,
+};
+
+const person = new Proxy(target, {
+  get(target, property) {
+    if (property in target) {
+      return target[property];
+    } else {
+      return `Property "${property}" does not exist on target.`;
+    }
+  },
+});
+
+console.log(person.name); // "Sahil"
+console.log(person.age); // 21
+console.log(person.gender); // "Property "gender" does not exist on target."
+```
+
+---
+
+## Adding Validation with `set`
+
+Let's use the `set` trap to validate property values before setting them:
+
+```javascript
+const target = {
+  name: "Sahil",
+  age: 21,
+};
+
+const person = new Proxy(target, {
+  get(target, property) {
+    if (property in target) {
+      return target[property];
+    } else {
+      return `Property "${property}" does not exist on target.`;
+    }
+  },
+
+  set(target, property, value) {
+    if (!(property in target)) {
+      console.warn(`Property "${property}" does not exist on target.`);
+      return false;
+    }
+
+    switch (property) {
+      case "name":
+        if (typeof value !== "string") {
+          console.error("Name must be a string.");
+          return false;
+        }
+        break;
+      case "age":
+        if (typeof value !== "number" || value <= 0) {
+          console.error("Age must be a positive number.");
+          return false;
+        }
+        break;
+    }
+
+    target[property] = value;
+    return true;
+  },
+});
+
+// Test cases
+person.age = 60; // ✅ valid
+person.name = "Drx"; // ✅ valid
+person.age = "10"; // ❌ invalid
+person.age = -1; // ❌ invalid
+person.name = 12343; // ❌ invalid
+```
+
+With this proxy in place, invalid data won’t get silently saved. You can `throw Error` insted of these `console.error`
+
+---
+
+## Introducing `Reflect`
+
+Now, when we're done validating, we usually apply the changes with:
+
+```javascript
+target[property] = value;
+```
+
+But is this how JavaScript internally performs default behavior? Not exactly.
+
+To apply default behavior in a more _standardized_ and _transparent_ way, JavaScript provides the **`Reflect` API**.
+
+> `Reflect` is a built-in object that mirrors the behavior of fundamental operations, providing default implementations for all traps available in a Proxy.
+
+### Why Use `Reflect`?
+
+- Offers a consistent way to forward operations.
+- Provides return values for operations (like `set`) that indicate success or failure.
+- Reduces the chance of error when replicating default behavior.
+
+Let’s refactor the earlier `set` trap using `Reflect.set`:
+
+```javascript
+const target = {
+  name: "Sahil",
+  age: 21,
+};
+
+const person = new Proxy(target, {
+  get(target, property) {
+    if (property in target) {
+      return Reflect.get(target, property);
+    }
+  },
+
+  set(target, property, value) {
+    if (!(property in target)) {
+      console.warn(`Property "${property}" does not exist on target.`);
+      return false;
+    }
+
+    switch (property) {
+      case "name":
+        if (typeof value !== "string") {
+          console.error("Name must be a string.");
+          return false;
+        }
+        break;
+      case "age":
+        if (typeof value !== "number" || value <= 0) {
+          console.error("Age must be a positive number.");
+          return false;
+        }
+        break;
+    }
+
+    return Reflect.set(target, property, value);
+  },
+});
+```
+
+## Summary
+
+- `Proxy` lets you intercept and redefine how objects behave.
+- Common traps include `get`, `set`, `deleteProperty`, and [more](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy/Proxy).
+- Use `Reflect` to forward behavior safely and consistently.
+- Great for **validation**, **logging**, **security**, and **virtual behaviors**.
