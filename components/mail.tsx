@@ -71,7 +71,7 @@ export const MailForm = () => {
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white dark:bg-neutral-800 rounded-xl p-6 w-80  max-w-lg shadow-lg relative"
+        className="bg-white dark:bg-neutral-800 rounded-xl p-6 w-80  md:min-w-lg  shadow-lg relative"
       >
         <h2 className="text-2xl font-bold mb-4 text-balance dark:text-white text-center">
           Get in Touch
@@ -104,7 +104,7 @@ export const MailForm = () => {
           {/* MESSAGE */}
           <div>
             <label className="block text-sm font-medium">
-              Message (10 characters min)
+              Message
             </label>
             <textarea
               className="mt-1 w-full border border-gray-300 rounded-lg px-4 py-2 h-28 resize-none focus:outline-none placeholder-zinc-400"
