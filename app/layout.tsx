@@ -2,6 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { IBM_Plex_Mono, IBM_Plex_Sans_Devanagari, Inter, JetBrains_Mono, STIX_Two_Text } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/react';
+import { ContactButton } from '@/components/form-toggle';
 
 const inter = Inter({ subsets: ['latin'] });
 const ibm_Mono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500', '600', '700'] });
@@ -96,6 +97,7 @@ export default function RootLayout({
             {children}
           </main>
           <Footer />
+          <ContactButton/>
           <Analytics />
         </div>
       </body>
