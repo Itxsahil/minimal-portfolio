@@ -77,7 +77,7 @@ export const Hi = () => {
   return (
     <div className="flex items-center gap-4">
       <div className="text-2xl font-bold">Hi</div>
-      <div className="text-2xl font-bold animate-bounce">👋</div>
+      {/* <div className="text-2xl font-bold animate-bounce">👋</div> */}
     </div>
   );
 };

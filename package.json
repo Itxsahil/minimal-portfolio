@@ -12,6 +12,7 @@
     "@types/mdx": "^2.0.13",
     "@vercel/analytics": "^1.5.0",
     "framer-motion": "^12.16.0",
+    "motion": "^12.23.25",
     "next": "15.3.3",
     "postgres": "^3.4.7",
     "react": "19.1.0",

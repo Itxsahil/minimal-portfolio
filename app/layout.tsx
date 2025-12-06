@@ -1,10 +1,10 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { IBM_Plex_Mono, IBM_Plex_Sans_Devanagari, Inter, JetBrains_Mono, STIX_Two_Text } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/react';
 
 const inter = Inter({ subsets: ['latin'] });
-
+const ibm_Mono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500', '600', '700'] });
 export const metadata: Metadata = {
   title: "Sahil Khan – Full-Stack Developer & Technical Writer",
   description:
@@ -74,17 +74,25 @@ export const metadata: Metadata = {
     telephone: false,
   },
 };
-
+const stix = STIX_Two_Text({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-stix-two-text",
+});
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+})
 export default function RootLayout({
   children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.className}`} suppressHydrationWarning>
-      <body className="antialiased tracking-tight">
+    <html lang="en" className={`${stix.className} ${stix.variable}`} suppressHydrationWarning>
+      <body className="antialiased">
         <div className="min-h-screen flex flex-col justify-between pt-0 md:pt-8 p-8 dark:bg-neutral-900 bg-white text-gray-900 dark:text-zinc-200">
-          <main className="max-w-[60ch] mx-auto w-full space-y-6 page-load-animation">
+          <main className="max-w-2xl mx-auto my-auto w-full space-y-6">
             {children}
           </main>
           <Footer />

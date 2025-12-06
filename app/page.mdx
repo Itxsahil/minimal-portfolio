@@ -1,27 +1,37 @@
 import { Hi, NameTransition } from "../components/name";
+import { FourDotLabel } from "../components/fourdot";
+
 
 <br />
 
-<NameTransition />
+{/* <NameTransition /> */}
+
 <Hi />
-I'm{"   "}**Sahil Khan**. A developer, community builder, and optimist based in
-`India`. I'm passionate about web development and enjoy solving real-world
-problems through code. I am working with JavaScript environment from a long time
-and love to share my knowledge with others.
+I'm{"   "}**Sahil Khan**. A developer, community builder, and optimist based in <FourDotLabel>India</FourDotLabel>.
+I'm passionate about web development and enjoy solving real-world problems through
+code. I am working with JavaScript environment from a long time and love to share
+my knowledge with others.
 
 ## Writings
 
-- [Trying to find my words again](/b/1)
-- [observebility](/b/2)
-- [JavaScript Array Methods](/b/3)
+<div className="flex flex-col space-y-2">
+  <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between">
+    <a href="/b/1" className="no-underline hover:text-gray-900 dark:hover:text-zinc-100 transition-colors">Trying to find my words again</a>
+    <span className="text-sm text-gray-400 dark:text-gray-500 tabular-nums">Dec 06, 2025</span>
+  </div>
+  <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between">
+    <a href="/b/2" className="no-underline hover:text-gray-900 dark:hover:text-zinc-100 transition-colors">observability</a>
+    <span className="text-sm text-gray-400 dark:text-gray-500 tabular-nums">Nov 28, 2025</span>
+  </div>
+  <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between">
+    <a href="/b/3" className="no-underline hover:text-gray-900 dark:hover:text-zinc-100 transition-colors">JavaScript Array Methods</a>
+    <span className="text-sm text-gray-400 dark:text-gray-500 tabular-nums">Nov 15, 2025</span>
+  </div>
+</div>
 
-## Projects
+## Code
 
 - Next.js / React
 - Tailwind CSS
 - TypeScript
 - Vercel
-
-## Code
-
-- [next-mdx-blog](https://github.com/leerob/next-mdx-blog)
