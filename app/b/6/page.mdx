@@ -1,0 +1,301 @@
+export const metadata = {
+  title: "The Beauty of Small Code: Why Overengineering Is an Addiction",
+  alternates: {
+    canonical: "/b/6",
+  },
+  description:
+    "Exploring why simple code is better than complex code, the psychology of overengineering, and how small code leads to clarity and maintainability.",
+};
+
+# The Beauty of Small Code: Why Overengineering Is an Addiction
+
+<small className="block mb-8 font-mono text-gray-400 dark:text-gray-500">
+  Sep 27, 2025
+</small>
+
+---
+
+## Table of Contents
+
+- Overview
+- The Overengineering Traps
+  - The “I need to look smart” trap
+  - The “future-proofing” illusion
+  - The fear of being wrong
+  - The dopamine hit
+- What Small Code Actually Means
+- Complexity Costs You More Than You Think
+- How to Notice You Are Overengineering
+- A Small Example
+- The Hidden Beauty of Small Code
+- When Complexity Is Worth It
+- Closing Thoughts
+
+---
+
+## Overview
+
+It’s been more than three years since I started my software development journey, and I genuinely enjoy this craft.  
+But early on, I believed **complex code was better code**.
+
+More patterns.  
+More abstraction.  
+More files.  
+More everything.
+
+It took me way too long to realize something simple:
+
+> **Small code is not “less”.**  
+> It’s clarity.  
+> It’s confidence.  
+> It’s freedom.
+
+And complexity?  
+Most of the time, it’s just **insecurity wearing architecture diagrams**.
+
+Let’s talk about the shift.
+
+---
+
+## The Overengineering Traps
+
+### The “I need to look smart” trap
+
+You add:
+
+- Extra layers  
+- Extra classes  
+- Extra configuration  
+- Extra patterns  
+
+All because you’re afraid your code looks *too simple*.
+
+But here’s the truth:
+
+- **Simple works**
+- **Simple survives**
+
+---
+
+### The “future-proofing” illusion
+
+We tell ourselves:
+
+> “Let me prepare for every possible future use case.”
+
+And suddenly a 30-line feature becomes a 300-line “architecture”.
+
+Most of those futures never arrive.
+
+---
+
+### The fear of being wrong
+
+Complicated code *feels* safer.
+
+> “If I add more checks and knobs, maybe I won’t break anything.”
+
+Ironically, **complexity is the thing that breaks everything**.
+
+---
+
+### The dopamine hit
+
+Let’s be honest — building impressive-looking structures feels good.  
+It feeds the ego.
+
+Small, boring, honest code does not.
+
+---
+
+## What Small Code Actually Means
+
+Small code isn’t *less functionality*.  
+It’s **less waste**.
+
+Small code:
+
+- Removes layers that add no meaning  
+- Doesn’t abstract until it’s necessary  
+- Handles today’s problem *today*  
+- Solves the real case, not the imaginary one  
+- Is readable by future-you at 3 AM  
+
+Over time, I realized something important:
+
+> **The shortest code is not the goal.  
+> The clearest code is.**
+
+**Small ≠ tiny**  
+**Small = essential**
+
+---
+
+## Complexity Costs You More Than You Think
+
+### Cost 1: Time
+
+You don’t save time by over-architecting.  
+You lose it.
+
+You spend hours building structures instead of solving problems.
+
+---
+
+### Cost 2: Speed
+
+Complexity kills iteration.
+
+It slows down:
+
+- Testing  
+- Debugging  
+- Onboarding  
+- Change  
+
+Small code is:
+
+- Easy to modify  
+- Easy to delete  
+- Easy to rebuild  
+
+---
+
+### Cost 3: Mental energy
+
+A five-file abstraction for something that should be ten lines in one file  
+**drains the soul**.
+
+Minimalism frees your head.
+
+---
+
+## How to Notice You Are Overengineering
+
+These are the exact red flags I catch in myself:
+
+- ❌ Creating a folder that doesn’t need to exist  
+- ❌ Naming things *manager*, *service*, *provider*, or *handler* without knowing why  
+- ❌ Writing “reusable” code no one reuses  
+- ❌ Building a configuration system for one static value  
+- ❌ Adding a class where a plain object would do  
+- ❌ Designing interfaces for things that may never change  
+
+When this happens, I stop.
+
+And I delete.
+
+---
+
+## A Small Example
+
+### Overengineered version
+
+```js
+class NotificationService {
+  constructor(sender) {
+    this.sender = sender;
+  }
+
+  notifyUser(userId, message) {
+    if (!userId) throw new Error("Missing userId");
+    if (!message) throw new Error("Missing message");
+    this.sender.send({ userId, message });
+  }
+}
+
+class EmailSender {
+  send(payload) {
+    console.log("Email sent:", payload);
+  }
+}
+
+const service = new NotificationService(new EmailSender());
+service.notifyUser(42, "Hello there!");
+```
+
+Looks professional.
+But unnecessary when the app sends only one type of notification.
+
+### Small version
+
+```js
+function sendNotification(userId, message) {
+  console.log("Email sent:", { userId, message });
+}
+
+sendNotification(42, "Hello there!");
+```
+
+Same result.
+One-tenth the code.
+One-tenth the maintenance.
+
+<br />
+
+## The Hidden Beauty of Small Code
+
+Small code taught me lessons beyond programming:
+
+- Restraint is a skill
+
+- Clarity is deeper than complexity
+
+- Solving real problems beats looking clever
+
+- Deleting code is an achievement
+
+- Simplicity takes courage
+
+Because simple code exposes you.
+
+No decorations.
+No layers.
+No architecture to hide behind.
+
+Just you, your logic, and the truth.
+
+
+## When Complexity Is Worth It
+
+Small code isn’t always the answer.
+
+Complexity *is* justified when:
+
+* The problem is genuinely large
+* Multiple teams are involved
+* Extensibility is real, not imagined
+* Performance constraints demand structure
+* The cost of change is high
+
+But it should be born from **necessity**, not fear.
+
+---
+
+## Closing Thoughts
+
+Small code isn’t about minimalism.
+It’s about **honesty**.
+
+* Honest about the size of the problem
+* Honest about what matters today
+* Honest about what truly needs to exist
+
+Most codebases don’t suffer from missing architecture.
+They suffer from **too much of it**.
+
+If there’s one thing I’ve learned so far:
+
+> **Big brains write small code.**
+> **Overengineering is just noise.**
+
+And the quieter your code becomes,
+the more clearly you hear what the problem was saying.
+
+---
+
+<blockquote className="mt-12 text-center italic text-gray-400 dark:text-gray-500">
+  “Perfection is achieved, not when there is nothing more to add,  
+  but when there is nothing left to take away.”  
+  <br/> — Antoine de Saint-Exupéry
+</blockquote>
