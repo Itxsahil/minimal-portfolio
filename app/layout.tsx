@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     "Portfolio",
     "Software Engineer",
   ],
-  metadataBase: new URL("https://sahilkhan.site"),
+  metadataBase: new URL("https://portfolio.stilldrx.deno.net"),
   alternates: {
     canonical: "/",
     languages: {
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
       "Full-Stack Developer & Technical Writer. Showcasing web development projects, insightful blog posts, and creative problem solving with modern tech stacks.",
     images: [
       {
-        url: "https://sahilkhan.site/og/home-og.png",
+        url: "https://portfolio.stilldrx.deno.net/og/home-og.png",
         width: 800,
         height: 600,
         alt: "Sahil Khan",
