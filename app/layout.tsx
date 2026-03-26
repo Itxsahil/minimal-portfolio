@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { IBM_Plex_Mono, IBM_Plex_Sans_Devanagari, Inter, JetBrains_Mono, STIX_Two_Text } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/react';
 import { ContactButton } from '@/components/form-toggle';
-
+import Script  from 'next/script';
 const inter = Inter({ subsets: ['latin'] });
 const ibm_Mono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500', '600', '700'] });
 export const metadata: Metadata = {
@@ -99,6 +99,7 @@ export default function RootLayout({
           <Footer />
           <ContactButton/>
           <Analytics />
+          <Script src="./oneko/oneko.js" data-cat="./oneko/oneko.gif"/>
         </div>
       </body>
     </html>
