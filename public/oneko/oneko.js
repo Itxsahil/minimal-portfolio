@@ -16,7 +16,7 @@
   let mousePosX = 0;
   let mousePosY = 0;
 
-  let frameCount = 0;
+  let isSleeping = false;
   let idleTime = 0;
   let idleAnimation = null;
   let idleAnimationFrame = 0;
@@ -119,7 +119,7 @@
     nekoEl.style.width = "32px";
     nekoEl.style.height = "32px";
     nekoEl.style.position = "fixed";
-    nekoEl.style.pointerEvents = "none";
+    nekoEl.style.pointerEvents = "auto";
     nekoEl.style.imageRendering = "pixelated";
     nekoEl.style.left = `${nekoPosX - 16}px`;
     nekoEl.style.top = `${nekoPosY - 16}px`;
@@ -129,7 +129,22 @@
     
     document.body.appendChild(nekoEl);
 
+    nekoEl.addEventListener("click", function (event) {
+      event.stopPropagation();
+      isSleeping = !isSleeping;
+      if (isSleeping) {
+        playMeow();
+        idleAnimation = "sleeping";
+        idleAnimationFrame = 0;
+      } else {
+        resetIdleAnimation();
+        mousePosX = event.clientX;
+        mousePosY = event.clientY;
+      }
+    });
+
     document.addEventListener("mousemove", function (event) {
+      if (isSleeping) return;
       mousePosX = event.clientX;
       mousePosY = event.clientY;
     });
@@ -154,6 +169,12 @@
   }
 
   let lastFrameTimestamp;
+  let meowAudio = new Audio('/oneko/meow.mp3');
+
+  function playMeow() {
+    meowAudio.currentTime = 0;
+    meowAudio.play().catch(() => {});
+  }
 
   function onAnimationFrame(timestamp) {
     // Stops execution if the neko element is removed from DOM
@@ -210,14 +231,15 @@
 
     switch (idleAnimation) {
       case "sleeping":
+        if (!isSleeping && idleAnimationFrame > 192) {
+          resetIdleAnimation();
+          break;
+        }
         if (idleAnimationFrame < 8) {
           setSprite("tired", 0);
           break;
         }
         setSprite("sleeping", Math.floor(idleAnimationFrame / 4));
-        if (idleAnimationFrame > 192) {
-          resetIdleAnimation();
-        }
         break;
       case "scratchWallN":
       case "scratchWallS":

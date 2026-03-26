@@ -1,7 +1,6 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { IBM_Plex_Mono, IBM_Plex_Sans_Devanagari, Inter, JetBrains_Mono, STIX_Two_Text } from 'next/font/google';
-import { Analytics } from '@vercel/analytics/react';
 import { ContactButton } from '@/components/form-toggle';
 import Script  from 'next/script';
 const inter = Inter({ subsets: ['latin'] });
@@ -98,8 +97,7 @@ export default function RootLayout({
           </main>
           <Footer />
           <ContactButton/>
-          <Analytics />
-          <Script src="./oneko/oneko.js" data-cat="./oneko/oneko.gif"/>
+          <Script src="/oneko/oneko.js" data-cat="/oneko/oneko.gif"/>
         </div>
       </body>
     </html>
