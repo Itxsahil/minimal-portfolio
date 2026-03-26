@@ -148,6 +148,18 @@
       mousePosX = event.clientX;
       mousePosY = event.clientY;
     });
+
+    document.addEventListener("touchmove", function (event) {
+      if (isSleeping) return;
+      mousePosX = event.touches[0].clientX;
+      mousePosY = event.touches[0].clientY;
+    }, { passive: true });
+
+    document.addEventListener("touchstart", function (event) {
+      if (isSleeping) return;
+      mousePosX = event.touches[0].clientX;
+      mousePosY = event.touches[0].clientY;
+    }, { passive: true });
     
     if (persistPosition) {
       window.addEventListener("beforeunload", function (event) {
