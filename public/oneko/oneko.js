@@ -10,13 +10,14 @@
   const nekoEl = document.createElement("div");
   let persistPosition = true;
 
-  let nekoPosX = 32;
-  let nekoPosY = 32;
+  let nekoPosX = window.innerWidth / 2;
+  let nekoPosY = window.innerHeight / 2;
   
-  let mousePosX = 0;
-  let mousePosY = 0;
+  let mousePosX = window.innerWidth / 2;
+  let mousePosY = window.innerHeight / 2;
 
   let isSleeping = false;
+  let frameCount = 0;
   let idleTime = 0;
   let idleAnimation = null;
   let idleAnimationFrame = 0;
@@ -102,15 +103,20 @@
     if (persistPosition) {
       let storedNeko = JSON.parse(window.localStorage.getItem("oneko"));
       if (storedNeko !== null) {
-        nekoPosX = storedNeko.nekoPosX;
-        nekoPosY = storedNeko.nekoPosY;
-        mousePosX = storedNeko.mousePosX;
-        mousePosY = storedNeko.mousePosY;
-        frameCount = storedNeko.frameCount;
-        idleTime = storedNeko.idleTime;
-        idleAnimation = storedNeko.idleAnimation;
-        idleAnimationFrame = storedNeko.idleAnimationFrame;
-        nekoEl.style.backgroundPosition = storedNeko.bgPos;
+        // Reset if position is stuck at top-left corner (bad saved state)
+        if (storedNeko.nekoPosX < 100 && storedNeko.nekoPosY < 100) {
+          window.localStorage.removeItem("oneko");
+        } else {
+          nekoPosX = storedNeko.nekoPosX;
+          nekoPosY = storedNeko.nekoPosY;
+          mousePosX = storedNeko.mousePosX;
+          mousePosY = storedNeko.mousePosY;
+          frameCount = storedNeko.frameCount;
+          idleTime = storedNeko.idleTime;
+          idleAnimation = storedNeko.idleAnimation;
+          idleAnimationFrame = storedNeko.idleAnimationFrame;
+          nekoEl.style.backgroundPosition = storedNeko.bgPos;
+        }
       }
     }
   
@@ -123,6 +129,17 @@
     nekoEl.style.imageRendering = "pixelated";
     nekoEl.style.left = `${nekoPosX - 16}px`;
     nekoEl.style.top = `${nekoPosY - 16}px`;
+
+    // Ensure oneko starts at center if no stored position
+    if (!window.localStorage.getItem("oneko")) {
+      nekoPosX = window.innerWidth / 2;
+      nekoPosY = window.innerHeight / 2;
+      mousePosX = window.innerWidth / 2;
+      mousePosY = window.innerHeight / 2;
+      nekoEl.style.left = `${nekoPosX - 16}px`;
+      nekoEl.style.top = `${nekoPosY - 16}px`;
+    }
+
     nekoEl.style.zIndex = 2147483647;
 
     nekoEl.style.backgroundImage = `url(${nekoFile})`;
