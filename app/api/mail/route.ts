@@ -1,6 +1,10 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.NEXT_RESEND_API_KEY);
+function getResend() {
+  const key = process.env.NEXT_RESEND_API_KEY;
+  if (!key) throw new Error("Missing NEXT_RESEND_API_KEY");
+  return new Resend(key);
+}
 
 interface ContactFormData {
   email: string;
@@ -80,7 +84,7 @@ export async function POST(request: Request) {
   // ------------------------------
   // 3. SENDING EMAIL
   // ------------------------------
-  const { error } = await resend.emails.send({
+  const { error } = await getResend().emails.send({
     from: "Portfolio <portfolio@sahilkhan.site>",
     to: ["sahilkh9087@gmail.com"],
     subject: "New Portfolio Message",

@@ -33,7 +33,7 @@ export const NameTransition = () => {
             <Image
               // className="md:mt-12 h-24 w-24 rounded-xl shadow-2xs z-10"
               src="/bald.jpeg"
-              alt="Picture of the author"
+              alt="Sahil Khan — Full-Stack Developer & Technical Writer"
               width={500}
               height={500}
             />
