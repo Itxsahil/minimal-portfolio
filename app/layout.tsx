@@ -93,32 +93,7 @@ export default function RootLayout({
     <html lang="en" className={`${stix.className} ${stix.variable}`} suppressHydrationWarning>
       <body className="antialiased">
         <div className="min-h-screen flex flex-col justify-between pt-0 md:pt-8 p-8 dark:bg-neutral-900 bg-white text-gray-900 dark:text-zinc-200">
-          <Script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@graph": [
-                  {
-                    "@type": "Person",
-                    "name": "Sahil Khan",
-                    "url": "https://sahilkhan.site",
-                    "jobTitle": "Full-Stack Developer & Technical Writer",
-                    "sameAs": [
-                      "https://x.com/sahilkhan_dev",
-                      "https://github.com/itxsahil",
-                      "https://peerlist.io/itxsahil"
-                    ]
-                  },
-                  {
-                    "@type": "WebSite",
-                    "name": "Sahil Khan",
-                    "url": "https://sahilkhan.site"
-                  }
-                ]
-              })
-            }}
-          />
+          
           <main className="max-w-2xl mx-auto my-auto w-full space-y-6">
             {children}
           </main>
