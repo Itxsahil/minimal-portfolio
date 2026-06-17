@@ -49,6 +49,14 @@ export const metadata: Metadata = {
     title: "Sahil Khan",
     description:
       "Full-Stack Developer & Technical Writer. Showcasing web development projects, insightful blog posts, and creative problem solving with modern tech stacks.",
+    images: [
+      {
+        url: "https://sahilkhan.site/og/home-og.png",
+        width: 800,
+        height: 600,
+        alt: "Sahil Khan",
+      },
+    ],
   },
   robots: {
     index: true,
