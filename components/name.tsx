@@ -11,33 +11,14 @@ export const NameTransition = () => {
           rel="noopener noreferrer"
           className="block z-5 overflow-hidden rounded shadow-xl ring-1 ring-slate-900/5 relative bg-white h-30 w-30"
         >
-          <span
-            style={{
-              boxSizing: "border-box",
-              display: "block",
-              overflow: "hidden",
-              width: "initial",
-              height: "initial",
-              background: "none",
-              opacity: 1,
-              border: 0,
-              margin: 0,
-              padding: 0,
-              position: "absolute",
-              top: 0,
-              left: 0,
-              bottom: 0,
-              right: 0,
-            }}
-          >
-            <Image
-              // className="md:mt-12 h-24 w-24 rounded-xl shadow-2xs z-10"
-              src="/bald.png"
-              alt="Sahil Khan — Full-Stack Developer & Technical Writer"
-              width={500}
-              height={500}
-            />
-          </span>
+          <Image
+            src="/bald.png"
+            alt="Sahil Khan — Full-Stack Developer & Technical Writer"
+            fill
+            priority
+            sizes="120px"
+            className="object-cover"
+          />
         </a>
 
         <div className="z-0">

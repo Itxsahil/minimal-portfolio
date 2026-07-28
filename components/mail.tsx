@@ -2,7 +2,11 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 
-export const MailForm = () => {
+type MailFormProps = {
+  onClose: () => void;
+};
+
+export const MailForm = ({ onClose }: MailFormProps) => {
   const [formData, setFormData] = useState({
     email: "",
     message: "",
@@ -67,12 +71,26 @@ export const MailForm = () => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
+    <div
+      className="fixed inset-0 flex items-center justify-center z-50"
+      onClick={onClose}
+    >
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white dark:bg-neutral-800 rounded-xl p-6 w-80  md:min-w-lg  shadow-lg relative"
+        className="bg-white dark:bg-neutral-800 rounded-xl p-6 w-80 md:min-w-lg shadow-lg relative"
+        onClick={(event) => event.stopPropagation()}
       >
+        <button
+          type="button"
+          aria-label="Close contact form"
+          onClick={onClose}
+          className="absolute right-3 top-3 rounded p-1 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-zinc-100"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="m6 6 12 12M18 6 6 18" />
+          </svg>
+        </button>
         <h2 className="text-2xl font-bold mb-4 text-balance dark:text-white text-center">
           Get in Touch
         </h2>
@@ -89,7 +107,7 @@ export const MailForm = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* EMAIL */}
           <div>
-            <label className="block text-sm font-medium">Email</label>
+            <label className="block text-sm font-medium  dark:text-white">Email</label>
             <input
               type="email"
               className="mt-1 w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none placeholder-zinc-400"
@@ -103,7 +121,7 @@ export const MailForm = () => {
 
           {/* MESSAGE */}
           <div>
-            <label className="block text-sm font-medium">
+            <label className="block text-sm font-medium  dark:text-white">
               Message
             </label>
             <textarea

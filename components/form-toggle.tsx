@@ -1,19 +1,63 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { MailForm } from './mail';
 import { motion } from 'motion/react';
 
 export const ContactButton = () => {
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
-  const toggleModal = () => setModalOpen(!isModalOpen);
+  const [viewportInset, setViewportInset] = useState(0);
+  const toggleModal = () => setModalOpen((isOpen) => !isOpen);
+  const closeModal = () => setModalOpen(false);
+
+  useEffect(() => {
+    if (!isModalOpen) return;
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeModal();
+    };
+
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [isModalOpen]);
+
+  useLayoutEffect(() => {
+    const updateViewportInset = () => {
+      const viewport = window.visualViewport;
+      if (!viewport) return;
+
+      const layoutHeight = Math.max(window.innerHeight, document.documentElement.clientHeight);
+      setViewportInset(Math.max(0, layoutHeight - viewport.height - viewport.offsetTop));
+    };
+
+    updateViewportInset();
+    window.visualViewport?.addEventListener('resize', updateViewportInset);
+    window.visualViewport?.addEventListener('scroll', updateViewportInset);
+    window.addEventListener('resize', updateViewportInset);
+
+    return () => {
+      window.visualViewport?.removeEventListener('resize', updateViewportInset);
+      window.visualViewport?.removeEventListener('scroll', updateViewportInset);
+      window.removeEventListener('resize', updateViewportInset);
+    };
+  }, []);
+
   return (
-    <div>
-      <div
+    <div
+      style={{
+        position: 'fixed',
+        bottom: `calc(1.25rem + ${viewportInset}px)`,
+        right: '1.25rem',
+        zIndex: 50,
+      }}
+    >
+      <button
+        type="button"
+        aria-label="Open contact form"
         onClick={toggleModal}
-        className="fixed bottom-5 right-4 cursor-pointer rounded-full p-4 bg-rose-500 hover:bg-rose-600 transition shadow-lg z-50 shadow-rose-500/50"
+        className="cursor-pointer rounded-full p-4 bg-rose-500 hover:bg-rose-600 transition shadow-lg shadow-rose-500/50"
       >
         <IconMessage className="w-6 h-6 text-white" />
-      </div>
+      </button>
 
       {/* Contact Modal */}
       {isModalOpen && (
@@ -31,7 +75,7 @@ export const ContactButton = () => {
             y: 100,
           }}
         >
-          <MailForm />
+          <MailForm onClose={closeModal} />
         </motion.div>
       )}
     </div>
@@ -58,4 +102,3 @@ const IconMessage = (props: React.SVGProps<SVGSVGElement>) => {
     </svg>
   );
 };
-
