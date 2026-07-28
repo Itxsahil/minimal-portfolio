@@ -100,7 +100,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${stix.className} ${stix.variable}`} suppressHydrationWarning>
       <body className="antialiased">
-        <div className="min-h-screen flex flex-col justify-between pt-0 md:pt-8 p-8 dark:bg-neutral-900 bg-white text-gray-900 dark:text-zinc-200">
+        <div className="min-h-dvh flex flex-col justify-between pt-0 md:pt-8 p-8 dark:bg-neutral-900 bg-white text-gray-900 dark:text-zinc-200">
           
           <main className="max-w-2xl mx-auto my-auto w-full space-y-6">
             {children}
