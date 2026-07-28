@@ -106,10 +106,10 @@ export default function RootLayout({
             {children}
           </main>
           <Footer />
-          <ContactButton/>
-          <Script src="/oneko/oneko.js" data-cat="/oneko/oneko.gif"/>
-          <Analytics />
         </div>
+        <ContactButton/>
+        <Script src="/oneko/oneko.js" data-cat="/oneko/oneko.gif"/>
+        <Analytics />
       </body>
     </html>
   );
