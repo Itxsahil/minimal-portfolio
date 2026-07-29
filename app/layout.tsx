@@ -24,9 +24,9 @@ export const metadata: Metadata = {
     siteName: "Sahil Khan's portfolio",
     images: [
       {
-        url: '/opengraph-image',
-        width: 1200,
-        height: 630,
+        url: '/og/home-og.png',
+        width: 1904,
+        height: 928,
         alt: 'Sahil Khan — Full-Stack Developer & Technical Writer',
       },
     ],
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     title: "Sahil Khan – Full-Stack Developer & Technical Writer",
     description:
       "Full-Stack Developer & Technical Writer. Showcasing web development projects, insightful blog posts, and creative problem solving with modern tech stacks.",
-    images: ['/opengraph-image'],
+    images: ['/og/home-og.png'],
     site: "@sahilkhan_dev",
     creator: "@sahilkhan_dev",
   },
