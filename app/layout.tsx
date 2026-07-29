@@ -13,14 +13,14 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/',
   },
-  authors: [{ name: 'Sahil Khan', url: 'https://sahilkhan.site' }],
+  authors: [{ name: 'Sahil Khan', url: 'https://www.sahilkhan.site' }],
   creator: 'Sahil Khan',
   openGraph: {
     type: 'website',
     title: "Sahil Khan – Full-Stack Developer & Technical Writer",
     description:
       "Full-Stack Developer & Technical Writer. Showcasing web development projects, insightful blog posts, and creative problem solving with modern tech stacks.",
-    url: "https://sahilkhan.site",
+    url: "https://www.sahilkhan.site",
     siteName: "Sahil Khan's portfolio",
     images: [
       {
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     site: "@sahilkhan_dev",
     creator: "@sahilkhan_dev",
   },
-  metadataBase: new URL("https://sahilkhan.site"),
+  metadataBase: new URL("https://www.sahilkhan.site"),
 };
 const stix = STIX_Two_Text({
   subsets: ["latin"],
