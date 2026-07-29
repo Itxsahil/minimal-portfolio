@@ -1,11 +1,11 @@
-export const metadata = {
+import { createArticleMetadata } from '@/app/metadata'
+
+export const metadata = createArticleMetadata({
   title: "JavaScript Array Methods: Implementing Core Methods",
-  alternates: {
-    canonical: "/b/3",
-  },
   description:
     "Learn how JavaScript array methods like map, filter, reduce, and forEach work under the hood by implementing them from scratch on Array.prototype.",
-};
+  pathname: '/b/3',
+})
 
 # JavaScript Array Methods
 <p className="text-sm text-gray-400 dark:text-gray-500 mb-8 font-mono">Jun 1, 2025</p>

@@ -1,11 +1,11 @@
-export const metadata = {
+import { createArticleMetadata } from '@/app/metadata'
+
+export const metadata = createArticleMetadata({
   title: "The Beauty of Small Code: Why Overengineering Is an Addiction",
-  alternates: {
-    canonical: "/b/6",
-  },
   description:
     "Exploring why simple code is better than complex code, the psychology of overengineering, and how small code leads to clarity and maintainability.",
-};
+  pathname: '/b/6',
+})
 
 # The Beauty of Small Code: Why Overengineering Is an Addiction
 

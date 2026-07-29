@@ -1,10 +1,10 @@
-export const metadata = {
-  title: "Trying to Find My Words Again",
-  alternates: {
-    canonical: "/b/1",
-  },
-  description: "Trying to Find My Words Again",
-};
+import { createArticleMetadata } from '@/app/metadata'
+
+export const metadata = createArticleMetadata({
+  title: 'Trying to Find My Words Again',
+  description: 'A personal reflection on rediscovering the habit of reading and writing.',
+  pathname: '/b/1',
+})
 
 # Trying to Find My Words Again
 <p className="text-sm text-gray-400 dark:text-gray-500 mb-8 font-mono">Oct 8, 2025</p>

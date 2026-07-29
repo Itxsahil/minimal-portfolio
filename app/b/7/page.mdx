@@ -1,11 +1,11 @@
-export const metadata = {
+import { createArticleMetadata } from '@/app/metadata'
+
+export const metadata = createArticleMetadata({
   title: "Why a MacBook Sometimes Outperforms a Laptop With a Dedicated GPU",
-  alternates: {
-    canonical: "/b/7",
-  },
   description:
     "MacBooks punch above their weight against dedicated GPU laptops — but what does a Linux lover think? A look at architecture, efficiency, and why I still choose Linux over everything.",
-};
+  pathname: '/b/7',
+})
 
 # Why a MacBook Sometimes Outperforms a Laptop With a Dedicated GPU
 

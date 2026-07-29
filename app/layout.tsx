@@ -10,78 +10,37 @@ export const metadata: Metadata = {
   title: "Sahil Khan – Full-Stack Developer & Technical Writer",
   description:
     "Explore the portfolio of Sahil Khan, a passionate Full-Stack Developer and Technical Writer. Showcasing web development projects, insightful blog posts, and creative problem solving with modern tech stacks.",
-  keywords: [
-    "Sahil Khan",
-    "Full-Stack Developer",
-    "Web Developer",
-    "JavaScript",
-    "React",
-    "Next.js",
-    "Node.js",
-    "Technical Writer",
-    "Frontend Developer",
-    "Backend Developer",
-    "Portfolio",
-    "Software Engineer",
-  ],
-  metadataBase: new URL("https://sahilkhan.site"),
   alternates: {
-    canonical: "/",
-    languages: {
-      "en-US": "/en-US",
-    },
+    canonical: '/',
   },
+  authors: [{ name: 'Sahil Khan', url: 'https://sahilkhan.site' }],
+  creator: 'Sahil Khan',
   openGraph: {
-    title: "Sahil Khan",
+    type: 'website',
+    title: "Sahil Khan – Full-Stack Developer & Technical Writer",
     description:
       "Full-Stack Developer & Technical Writer. Showcasing web development projects, insightful blog posts, and creative problem solving with modern tech stacks.",
+    url: "https://sahilkhan.site",
+    siteName: "Sahil Khan's portfolio",
     images: [
       {
-        url: "https://sahilkhan.site/og/home-og.png",
-        width: 800,
-        height: 600,
-        alt: "Sahil Khan",
+        url: '/opengraph-image',
+        width: 1200,
+        height: 630,
+        alt: 'Sahil Khan — Full-Stack Developer & Technical Writer',
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Sahil Khan",
+    title: "Sahil Khan – Full-Stack Developer & Technical Writer",
     description:
       "Full-Stack Developer & Technical Writer. Showcasing web development projects, insightful blog posts, and creative problem solving with modern tech stacks.",
-    images: [
-      {
-        url: "https://sahilkhan.site/og/home-og.png",
-        width: 800,
-        height: 600,
-        alt: "Sahil Khan",
-      },
-    ],
+    images: ['/opengraph-image'],
+    site: "@sahilkhan_dev",
+    creator: "@sahilkhan_dev",
   },
-  robots: {
-    index: true,
-    follow: true,
-    nocache: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  icons: {
-    icon: "/favicon.ico",
-  },
-  appleWebApp: {
-    title: "Sahil Khan",
-    statusBarStyle: "default",
-  },
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
+  metadataBase: new URL("https://sahilkhan.site"),
 };
 const stix = STIX_Two_Text({
   subsets: ["latin"],

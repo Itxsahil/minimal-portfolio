@@ -1,11 +1,11 @@
-export const metadata = {
+import { createArticleMetadata } from '@/app/metadata'
+
+export const metadata = createArticleMetadata({
   title: "Understanding WebRTC — Real-Time Communication in the Browser",
-  alternates: {
-    canonical: "/b/5",
-  },
   description:
     "A deep dive into WebRTC, covering NAT traversal, STUN, TURN, ICE, SDP, and how browsers connect peer-to-peer without servers.",
-};
+  pathname: '/b/5',
+})
 
 # WebRTC: A Complete Guide
 

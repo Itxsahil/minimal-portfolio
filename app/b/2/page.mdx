@@ -1,11 +1,11 @@
-export const metadata = {
+import { createArticleMetadata } from '@/app/metadata'
+
+export const metadata = createArticleMetadata({
   title: "Observability: Monitoring Node.js with Prometheus, Grafana & Loki",
-  alternates: {
-    canonical: "/b/2",
-  },
   description:
     "A practical guide to observability in Node.js — setting up Prometheus, Grafana, and Loki to monitor, log, and debug production servers effectively.",
-};
+  pathname: '/b/2',
+})
 
 # observability
 <p className="text-sm text-gray-400 dark:text-gray-500 mb-8 font-mono">Jul 24, 2025</p>
