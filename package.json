@@ -13,7 +13,6 @@
     "@vercel/analytics": "^1.5.0",
     "motion": "^12.23.25",
     "next": "15.3.8",
-    "postgres": "^3.4.7",
     "react": "19.1.2",
     "react-dom": "19.1.2",
     "resend": "^6.5.2",

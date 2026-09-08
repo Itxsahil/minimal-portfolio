@@ -76,9 +76,10 @@ export default function RootLayout({
 
 function Footer() {
   const links = [
-    { name: 'x/twitter', url: 'https://x.com/sahilkhan_dev' },
-    { name: 'peerlist', url: 'https://peerlist.io/itxsahil' },
-    { name: 'github', url: 'https://github.com/itxsahil' }
+    { name: 'x/twitter', url: '/x' },
+    { name: 'peerlist', url: '/pl' },
+    { name: 'github', url: '/github' },
+    { name: 'linkedin', url: '/ln' }
   ];
 
   return (
