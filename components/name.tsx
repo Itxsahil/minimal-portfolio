@@ -35,13 +35,13 @@ export const NameTransition = () => {
           </button>
 
           <div className="z-0">
-            <div className="absolute left-0 -right-12 top-0 h-px bg-slate-900/10 dark:bg-zinc-300/10
+            <div className="absolute left-0 -right-8 top-0 h-px bg-slate-900/10 dark:bg-zinc-300/10
         mask-[linear-gradient(to_right,transparent,white_4rem,white_calc(100%-4rem),transparent)]" />
 
             <div className="absolute -top-8 bottom-0 left-12 w-px bg-slate-900/10 dark:bg-zinc-300/10
         mask-[linear-gradient(to_top,transparent,white_4rem,white_calc(100%-4rem),transparent)]" />
 
-            <div className="absolute left-0 -right-12 bottom-14 h-px bg-slate-900/10 dark:bg-zinc-300/10
+            <div className="absolute left-0 -right-8 bottom-14 h-px bg-slate-900/10 dark:bg-zinc-300/10
         mask-[linear-gradient(to_right,transparent,white_4rem,white_calc(100%-4rem),transparent)]" />
 
             <div className="absolute right-0 -top-2 -bottom-8 w-px bg-slate-900/10 dark:bg-zinc-300/10
