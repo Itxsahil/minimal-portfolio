@@ -24,10 +24,10 @@ export const metadata: Metadata = {
     siteName: "Sahil Khan's portfolio",
     images: [
       {
-        url: '/og/home-og.png',
-        width: 1904,
-        height: 928,
-        alt: 'Sahil Khan — Full-Stack Developer & Technical Writer',
+        url: '/og/home.png',
+        width: 2400,
+        height: 1260,
+        alt: 'Sahil Khan — Engineer & Writer',
       },
     ],
   },
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     title: "Sahil Khan – Full-Stack Developer & Technical Writer",
     description:
       "Full-Stack Developer & Technical Writer. Showcasing web development projects, insightful blog posts, and creative problem solving with modern tech stacks.",
-    images: ['/og/home-og.png'],
+    images: ['/og/home.png'],
     site: "@sahilkhan_dev",
     creator: "@sahilkhan_dev",
   },
