@@ -10,11 +10,18 @@ html[data-eink='on'] {
   background-color: var(--eink-bg);
 }
 
-/* The page wrapper in the root layout carries Tailwind background utilities.
-   Two attribute levels of specificity beat them without needing !important. */
-html[data-eink='on'] body,
-html[data-eink='on'] body > div {
+/* The paper is painted once, on the page itself. */
+html[data-eink='on'] body {
   background-color: var(--eink-bg);
+  color: var(--eink-ink);
+}
+
+/* Every direct child of body is cleared instead of painted. The page wrapper
+   carries Tailwind background utilities that would cover the paper, and the
+   oneko cat and the contact button are body children too: painting them would
+   put an opaque square behind a transparent sprite. */
+html[data-eink='on'] body > div {
+  background-color: transparent;
   color: var(--eink-ink);
 }
 

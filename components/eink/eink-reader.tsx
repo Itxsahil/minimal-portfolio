@@ -30,6 +30,22 @@ const DEFAULTS: Settings = {
   amber: true
 };
 
+/** A reading face downloads the first time its profile is chosen. Switching
+ *  before it arrives reflows the article in full view, so the swap waits for
+ *  the font and happens behind the opaque part of the refresh flash. The cap
+ *  keeps a slow network from stalling the switch. */
+function waitForFont(family: string | undefined, capMs: number): Promise<void> {
+  const cap = new Promise<void>((resolve) => setTimeout(resolve, capMs));
+  if (!family || typeof document === 'undefined' || !('fonts' in document)) {
+    return cap;
+  }
+  const loaded = document.fonts
+    .load(`1rem "${family}"`)
+    .then(() => undefined)
+    .catch(() => undefined);
+  return Promise.race([loaded, cap]);
+}
+
 function readStored(): Settings {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -149,6 +165,15 @@ export function EInkReader({
     [refresh]
   );
 
+  const chooseProfile = useCallback(
+    async (id: ProfileId) => {
+      refresh();
+      await waitForFont(PROFILES.find((p) => p.id === id)?.family, 260);
+      setSettings((prev) => ({ ...prev, active: true, profile: id }));
+    },
+    [refresh]
+  );
+
   if (!onArticle) return <>{children}</>;
 
   const activeProfile =
@@ -169,6 +194,11 @@ export function EInkReader({
           className="eink-refresh"
           aria-hidden
           style={{ ['--eink-refresh-ms' as string]: `${REFRESH_MS}ms` }}
+          onAnimationEnd={(e) => {
+            // The sweep band ends at the same moment; only the panel waveform
+            // retires the overlay, so no dead fixed element is left behind.
+            if (e.animationName.includes('waveform')) setRefreshKey(0);
+          }}
         />
       )}
 
@@ -187,9 +217,7 @@ export function EInkReader({
                   type="button"
                   className="eink-profile"
                   aria-pressed={settings.active && settings.profile === profile.id}
-                  onClick={() =>
-                    update({ active: true, profile: profile.id }, true)
-                  }
+                  onClick={() => chooseProfile(profile.id)}
                 >
                   <span
                     className="eink-swatch"
@@ -215,9 +243,10 @@ export function EInkReader({
                 max={FONT_SIZE.max}
                 step={FONT_SIZE.step}
                 value={settings.fontSize}
+                disabled={!settings.active}
                 aria-label={`Font size, ${settings.fontSize} pixels`}
                 onChange={(e) =>
-                  update({ active: true, fontSize: Number(e.target.value) }, false)
+                  update({ fontSize: Number(e.target.value) }, false)
                 }
               />
               <span aria-hidden>{settings.fontSize}px</span>
@@ -228,9 +257,8 @@ export function EInkReader({
                 <input
                   type="checkbox"
                   checked={settings.dropCap}
-                  onChange={(e) =>
-                    update({ active: true, dropCap: e.target.checked }, false)
-                  }
+                  disabled={!settings.active}
+                  onChange={(e) => update({ dropCap: e.target.checked }, false)}
                 />
                 Drop cap
               </label>
@@ -240,9 +268,8 @@ export function EInkReader({
                   <input
                     type="checkbox"
                     checked={settings.amber}
-                    onChange={(e) =>
-                      update({ active: true, amber: e.target.checked }, false)
-                    }
+                    disabled={!settings.active}
+                    onChange={(e) => update({ amber: e.target.checked }, false)}
                   />
                   Frontlight
                 </label>
