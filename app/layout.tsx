@@ -2,6 +2,9 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { IBM_Plex_Mono, IBM_Plex_Sans_Devanagari, Inter, JetBrains_Mono, STIX_Two_Text } from 'next/font/google';
 import { ContactButton } from '@/components/form-toggle';
+import { ThemePicker } from '@/components/theme/theme-picker';
+import { einkFontVariables } from '@/components/theme/fonts';
+import { READING_SIZE, STORAGE_KEY, THEMES } from '@/components/theme/themes';
 import Script  from 'next/script';
 import { Analytics } from '@vercel/analytics/next';
 const inter = Inter({ subsets: ['latin'] });
@@ -51,15 +54,32 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
 })
+// Painted before first paint, so a reader who chose a theme never sees the
+// default site flash first.
+const themeScript = `(function(){try{
+var ids=${JSON.stringify(THEMES.map((t) => t.id))};
+var s=JSON.parse(localStorage.getItem(${JSON.stringify(STORAGE_KEY)})||'{}');
+if(ids.indexOf(s.theme)<0)return;
+var n=typeof s.size==='number'?Math.min(${READING_SIZE.max},Math.max(${READING_SIZE.min},s.size)):${READING_SIZE.default};
+var r=document.documentElement;
+r.setAttribute('data-theme',s.theme);
+r.setAttribute('data-dropcap',s.dropCap===true?'on':'off');
+r.setAttribute('data-frontlight',s.frontlight===false?'off':'on');
+r.style.setProperty('--reading-size',n+'px');
+}catch(e){}})();`;
+
 export default function RootLayout({
   children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${stix.className} ${stix.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${stix.className} ${stix.variable} ${einkFontVariables}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="antialiased">
-        <div className="min-h-dvh overflow-x-clip flex flex-col justify-between pt-0 md:pt-8 p-8 dark:bg-neutral-900 bg-white text-gray-900 dark:text-zinc-200">
+        <div className="min-h-dvh overflow-x-clip flex flex-col justify-between pt-0 md:pt-8 p-8 bg-paper text-text">
           
           <main className="max-w-2xl mx-auto my-auto w-full space-y-6">
             {children}
@@ -69,6 +89,7 @@ export default function RootLayout({
         <Script src="/oneko/oneko.js" data-cat="/oneko/oneko.gif"/>
         <Analytics />
         <ContactButton/>
+        <ThemePicker />
       </body>
     </html>
   );
@@ -91,7 +112,7 @@ function Footer() {
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-400 dark:text-gray-500 hover:text-blue-500 transition-colors duration-200"
+            className="text-muted hover:text-link transition-colors duration-200"
           >
             {link.name}
           </a>

@@ -20,7 +20,7 @@ export default function NotFound() {
         </h1>
       </div>
 
-      <p className="text-gray-500 dark:text-zinc-400 max-w-sm">
+      <p className="text-muted max-w-sm">
         Tux couldn&apos;t find this page. The link might be broken, or it may have wandered off.
       </p>
     </div>

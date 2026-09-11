@@ -33,13 +33,13 @@ export default function Writings() {
   return (
     <section>
       <h1 className="font-bold text-4xl pt-12 mb-0">{title}</h1>
-      <p className="text-gray-800 dark:text-zinc-300 tracking-tight">
+      <p className="text-text tracking-tight">
         {posts.length} posts, newest first.
       </p>
 
       {years.map((year) => (
         <div key={year} className="mt-10">
-          <h2 className="text-sm font-mono text-gray-400 dark:text-gray-500 mb-4">
+          <h2 className="text-sm font-mono text-muted mb-4">
             {year}
           </h2>
 
@@ -51,18 +51,18 @@ export default function Writings() {
                   <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
                     <Link
                       href={`/b/${post.slug}`}
-                      className="no-underline hover:text-gray-900 dark:hover:text-zinc-100 transition-colors"
+                      className="no-underline hover:text-ink transition-colors"
                     >
                       {post.title}
                     </Link>
                     <time
                       dateTime={post.date}
-                      className="text-sm text-gray-400 dark:text-gray-500 tabular-nums shrink-0"
+                      className="text-sm text-muted tabular-nums shrink-0"
                     >
                       {formatPostDate(post.date)}
                     </time>
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-zinc-400 tracking-tight mb-0 mt-1">
+                  <p className="text-sm text-muted tracking-tight mb-0 mt-1">
                     {post.description}
                   </p>
                 </article>

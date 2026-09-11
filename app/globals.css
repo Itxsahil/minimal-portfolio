@@ -1,8 +1,93 @@
 @import 'tailwindcss';
 
+/* ---------------------------------------------------------------------------
+   Theme tokens.
+
+   Every colour on the site is one of these names. Light values live here,
+   dark values in the media block below, and each reading theme redefines the
+   same names further down. Nothing else in the codebase should name a colour.
+   --------------------------------------------------------------------------- */
+
 @theme {
   --font-family-sans: var(--font-inter), sans-serif;
+
+  --color-paper: #ffffff;
+  --color-ink: #111113;
+  --color-text: #3f3f46;
+  --color-muted: #9ca3af;
+  --color-rule: #e4e4e7;
+  --color-panel: #f4f4f5;
+  --color-link: #3b82f6;
+
+  --font-reading: var(--font-stix-two-text), Georgia, 'Times New Roman', serif;
 }
+
+/* Dark is simply the theme you get when no reading theme is chosen. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --color-paper: #171717;
+    --color-ink: #f4f4f5;
+    --color-text: #d4d4d8;
+    --color-muted: #6b7280;
+    --color-rule: #3f3f46;
+    --color-panel: #27272a;
+    --color-link: #9ca3af;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Reading themes. Each one states its paper, its ink and its face; everything
+   else is derived, so a theme is three lines rather than a stylesheet.
+   --------------------------------------------------------------------------- */
+
+html[data-theme] {
+  --color-text: var(--color-ink);
+  --color-link: var(--color-ink);
+  --color-muted: color-mix(in srgb, var(--color-ink) 52%, var(--color-paper));
+  --color-rule: color-mix(in srgb, var(--color-ink) 22%, var(--color-paper));
+  --color-panel: color-mix(in srgb, var(--color-ink) 6%, var(--color-paper));
+}
+
+html[data-theme='remarkable'] {
+  --color-paper: #ece9e2;
+  --color-ink: #181816;
+  --font-reading: var(--font-eink-newsreader), Georgia, serif;
+}
+
+html[data-theme='kindle'] {
+  --color-paper: #f6f1e5;
+  --color-ink: #121210;
+  --font-reading: var(--font-eink-literata), Georgia, serif;
+}
+
+html[data-theme='boox'] {
+  --color-paper: #fbfbfa;
+  --color-ink: #080808;
+  --font-reading: var(--font-eink-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+html[data-theme='newsprint'] {
+  --color-paper: #efebe0;
+  --color-ink: #0f0f0e;
+  --font-reading: var(--font-eink-garamond), Georgia, serif;
+}
+
+html[data-theme='carbon'] {
+  --color-paper: #171716;
+  --color-ink: #eae6dc;
+  --font-reading: var(--font-stix-two-text), Georgia, serif;
+}
+
+/* Browser chrome — scrollbars, checkboxes, the range track — follows this. */
+html { color-scheme: light; }
+html[data-theme='carbon'] { color-scheme: dark; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) { color-scheme: dark; }
+}
+
+/* ---------------------------------------------------------------------------
+   Syntax highlighting
+   --------------------------------------------------------------------------- */
 
 :root {
   --sh-class: #7aa2f7;
@@ -15,179 +100,75 @@
   --sh-entity: #e0af68;
 }
 
+/* ---------------------------------------------------------------------------
+   Base
+   --------------------------------------------------------------------------- */
+
 html {
   min-width: 360px;
   scrollbar-gutter: stable;
 }
 
 body {
+  background-color: var(--color-paper);
+  color: var(--color-text);
+  font-family: var(--font-reading);
+  font-size: var(--reading-size, 1rem);
   text-rendering: optimizeLegibility;
 }
 
 h1,
 h2,
 h3,
-h4 {
+h4,
+h5,
+h6 {
+  font-family: var(--font-reading);
+  font-weight: 500;
+  color: var(--color-ink);
   text-wrap: balance;
 }
-
-pre {
-  background-color: #16161e;
-  border-radius: 0.5rem;
-  overflow-x: auto;
-  padding: 1rem;
-  margin: 1.5rem 0;
-  line-height: 1;
-}
-
-pre::-webkit-scrollbar {
-  display: none;
-}
-
-pre {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-code {
-  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
-  font-size: 14px;
-  padding: 0.2em 0.4em;
-  border-radius: 0.3em;
-  background-color: var(--color-gray-100);
-}
-
-pre code {
-  background-color: transparent;
-  padding: 0;
-  border: none;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-pre code > span .sh__token--identifier {
-  color: white !important;
-}
-
-code:not(pre code) span {
-  font-weight: 500;
-  color: black !important;
-}
-
-@media (prefers-color-scheme: dark) {
-  code {
-    font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
-    font-size: 14px;
-    padding: 0.2em 0.4em;
-    border-radius: 0.3em;
-    background-color: var(--color-zinc-800);
-  }
-
-  code:not(pre code) span {
-    color: var(--color-zinc-100) !important;
-  }
-}
-
-pre code span {
-  font-weight: 500;
-}
-
-hr {
-  color: var(--color-gray-200);
-}
-
-/* Remove Safari input shadow on mobile */
-input[type='text'],
-input[type='email'] {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-}
-
-table {
-  display: block;
-  max-width: fit-content;
-  overflow-x: auto;
-  white-space: nowrap;
-  text-align: left;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-stix-two-text), serif;
-  font-weight: 500;
-  color: var(--color-gray-900);
-}
-
-@media (prefers-color-scheme: dark) {
-  h1, h2, h3, h4, h5, h6 {
-    color: var(--color-zinc-100);
-  }
-}
-
 
 p {
   line-height: 1.8;
   margin-bottom: 1.75rem;
-  font-size: 1.05rem;
-  color: var(--color-gray-700);
-}
-
-@media (prefers-color-scheme: dark) {
-  p {
-    color: var(--color-zinc-300);
-  }
+  font-size: 1.05em;
+  color: var(--color-text);
 }
 
 strong {
   font-weight: 600;
-  color: var(--color-gray-900);
-}
-
-@media (prefers-color-scheme: dark) {
-  strong {
-    color: var(--color-zinc-100);
-  }
+  color: var(--color-ink);
 }
 
 em {
   font-style: italic;
-  font-family: var(--font-stix-two-text), serif;
+  font-family: var(--font-reading);
 }
 
 blockquote {
-  border-left: 2px solid var(--color-gray-200);
+  border-left: 2px solid var(--color-rule);
   padding-left: 1.25rem;
   font-style: italic;
   margin-bottom: 1.75rem;
-  color: var(--color-gray-600);
+  color: var(--color-muted);
 }
 
-@media (prefers-color-scheme: dark) {
-  blockquote {
-    border-left-color: var(--color-zinc-700);
-    color: var(--color-zinc-400);
-  }
+hr {
+  color: var(--color-rule);
+  border-color: var(--color-rule);
 }
 
 a {
   text-decoration-line: underline;
-  text-decoration-color: var(--color-gray-300);
+  text-decoration-color: var(--color-rule);
   text-decoration-thickness: 1px;
   text-underline-offset: 4px;
   transition: text-decoration-color 0.2s;
 }
 
 a:hover {
-  text-decoration-color: var(--color-zinc-500);
-}
-
-@media (prefers-color-scheme: dark) {
-  a {
-    text-decoration-color: var(--color-zinc-700);
-  }
-  a:hover {
-    text-decoration-color: var(--color-zinc-400);
-  }
+  text-decoration-color: var(--color-muted);
 }
 
 ul {
@@ -202,12 +183,90 @@ li {
 }
 
 li::before {
-  content: "•";
+  content: '•';
   position: absolute;
   left: 0;
-  color: var(--color-gray-400);
+  color: var(--color-muted);
 }
-/* globals.css */
+
+table {
+  display: block;
+  max-width: fit-content;
+  overflow-x: auto;
+  white-space: nowrap;
+  text-align: left;
+}
+
+/* Remove Safari input shadow on mobile */
+input[type='text'],
+input[type='email'] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Code
+   --------------------------------------------------------------------------- */
+
+pre {
+  background-color: #16161e;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  padding: 1rem;
+  margin: 1.5rem 0;
+  line-height: 1;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+pre::-webkit-scrollbar {
+  display: none;
+}
+
+code {
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 14px;
+  padding: 0.2em 0.4em;
+  border-radius: 0.3em;
+  background-color: var(--color-panel);
+  color: var(--color-ink);
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+pre code > span .sh__token--identifier {
+  color: white !important;
+}
+
+pre code span {
+  font-weight: 500;
+}
+
+code:not(pre code) span {
+  font-weight: 500;
+  color: var(--color-ink) !important;
+}
+
+/* A reading theme puts the whole page on paper, so code goes with it. */
+html[data-theme] pre {
+  background-color: var(--color-panel);
+  border: 1px solid var(--color-rule);
+}
+
+html[data-theme] :is(pre code, code) span {
+  color: var(--color-ink) !important;
+}
+
+/* ---------------------------------------------------------------------------
+   Animation
+   --------------------------------------------------------------------------- */
 
 @keyframes blurFadeIn {
   0% {

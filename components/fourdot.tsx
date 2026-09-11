@@ -5,9 +5,9 @@ import React from 'react';
 export const FourDotLabel: React.FC<React.PropsWithChildren<FourDotLabelProps>> = ({
   children,
   className = "",
-  dotColor = "bg-gray-400 dark:bg-zinc-500",
-  bgColor = "bg-gray-100 dark:bg-zinc-800",
-  textColor = "text-gray-900 dark:text-zinc-200"
+  dotColor = "bg-muted",
+  bgColor = "bg-panel",
+  textColor = "text-ink"
 }) => {
   return (
     <span className={`relative inline-flex items-center justify-center px-2 py-0.5 mx-1 rounded-md ${bgColor} ${className} align-baseline`}>

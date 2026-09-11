@@ -22,7 +22,7 @@ export const NameTransition = () => {
           <button
             type="button"
             onClick={() => setIsOpen(true)}
-            className="block z-5 overflow-hidden rounded shadow-xl ring-1 ring-slate-900/5 relative bg-white h-30 w-30 cursor-pointer"
+            className="block z-5 overflow-hidden rounded shadow-xl ring-1 ring-slate-900/5 relative bg-panel h-30 w-30 cursor-pointer"
           >
             <Image
               src="/bald.png"
@@ -35,16 +35,16 @@ export const NameTransition = () => {
           </button>
 
           <div className="z-0">
-            <div className="absolute left-0 -right-8 top-0 h-px bg-slate-900/10 dark:bg-zinc-300/10
+            <div className="absolute left-0 -right-8 top-0 h-px bg-rule
         mask-[linear-gradient(to_right,transparent,white_4rem,white_calc(100%-4rem),transparent)]" />
 
-            <div className="absolute -top-8 bottom-0 left-12 w-px bg-slate-900/10 dark:bg-zinc-300/10
+            <div className="absolute -top-8 bottom-0 left-12 w-px bg-rule
         mask-[linear-gradient(to_top,transparent,white_4rem,white_calc(100%-4rem),transparent)]" />
 
-            <div className="absolute left-0 -right-8 bottom-14 h-px bg-slate-900/10 dark:bg-zinc-300/10
+            <div className="absolute left-0 -right-8 bottom-14 h-px bg-rule
         mask-[linear-gradient(to_right,transparent,white_4rem,white_calc(100%-4rem),transparent)]" />
 
-            <div className="absolute right-0 -top-2 -bottom-8 w-px bg-slate-900/10 dark:bg-zinc-300/10
+            <div className="absolute right-0 -top-2 -bottom-8 w-px bg-rule
         mask-[linear-gradient(to_top,transparent,white_4rem,white_calc(100%-4rem),transparent)]" />
 
             <div className="absolute bottom-full right-10 -mb-px flex h-8 items-end overflow-hidden">

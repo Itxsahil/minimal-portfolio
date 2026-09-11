@@ -78,20 +78,20 @@ export const MailForm = ({ onClose }: MailFormProps) => {
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white dark:bg-neutral-800 rounded-xl p-6 w-80 md:min-w-lg shadow-lg relative"
+        className="bg-paper rounded-xl p-6 w-80 md:min-w-lg shadow-lg relative"
         onClick={(event) => event.stopPropagation()}
       >
         <button
           type="button"
           aria-label="Close contact form"
           onClick={onClose}
-          className="absolute right-3 top-3 rounded p-1 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-zinc-100"
+          className="absolute right-3 top-3 rounded p-1 text-muted transition hover:bg-panel hover:text-ink"
         >
           <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="m6 6 12 12M18 6 6 18" />
           </svg>
         </button>
-        <h2 className="text-2xl font-bold mb-4 text-balance dark:text-white text-center">
+        <h2 className="text-2xl font-bold mb-4 text-balance text-ink text-center">
           Get in Touch
         </h2>
 
@@ -107,10 +107,10 @@ export const MailForm = ({ onClose }: MailFormProps) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* EMAIL */}
           <div>
-            <label className="block text-sm font-medium  dark:text-white">Email</label>
+            <label className="block text-sm font-medium  text-ink">Email</label>
             <input
               type="email"
-              className="mt-1 w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none placeholder-zinc-400"
+              className="mt-1 w-full border border-rule rounded-lg px-4 py-2 focus:outline-none placeholder-zinc-400"
               placeholder="you@example.com"
               value={formData.email}
               onChange={(e) =>
@@ -121,11 +121,11 @@ export const MailForm = ({ onClose }: MailFormProps) => {
 
           {/* MESSAGE */}
           <div>
-            <label className="block text-sm font-medium  dark:text-white">
+            <label className="block text-sm font-medium  text-ink">
               Message
             </label>
             <textarea
-              className="mt-1 w-full border border-gray-300 rounded-lg px-4 py-2 h-28 resize-none focus:outline-none placeholder-zinc-400"
+              className="mt-1 w-full border border-rule rounded-lg px-4 py-2 h-28 resize-none focus:outline-none placeholder-zinc-400"
               placeholder="Your message..."
               value={formData.message}
               onChange={(e) =>

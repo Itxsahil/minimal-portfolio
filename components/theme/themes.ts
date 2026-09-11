@@ -1,27 +1,27 @@
-export type ProfileId =
+export type ThemeId =
   | 'remarkable'
   | 'kindle'
   | 'boox'
   | 'newsprint'
   | 'carbon';
 
-export type Profile = {
-  id: ProfileId;
+export type Theme = {
+  id: ThemeId;
   name: string;
-  /** Shown under the name in the panel. */
   hint: string;
-  bg: string;
+  /** Swatch only. The real palette lives in globals.css as theme tokens. */
+  paper: string;
   ink: string;
   /** Family to wait for before switching, so the swap does not reflow in view. */
   family: string;
 };
 
-export const PROFILES: Profile[] = [
+export const THEMES: Theme[] = [
   {
     id: 'remarkable',
     name: 'reMarkable Tablet',
     hint: 'Linen paper, warm grey',
-    bg: '#ECE9E2',
+    paper: '#ECE9E2',
     ink: '#181816',
     family: 'Newsreader'
   },
@@ -29,7 +29,7 @@ export const PROFILES: Profile[] = [
     id: 'kindle',
     name: 'Kindle Warm Light',
     hint: 'Justified, amber frontlight',
-    bg: '#F6F1E5',
+    paper: '#F6F1E5',
     ink: '#121210',
     family: 'Literata'
   },
@@ -37,7 +37,7 @@ export const PROFILES: Profile[] = [
     id: 'boox',
     name: 'Boox Modern Stark',
     hint: 'High contrast sans',
-    bg: '#FBFBFA',
+    paper: '#FBFBFA',
     ink: '#080808',
     family: 'Inter'
   },
@@ -45,7 +45,7 @@ export const PROFILES: Profile[] = [
     id: 'newsprint',
     name: '1-Bit Newsprint',
     hint: 'Dithered dot matrix',
-    bg: '#EFEBE0',
+    paper: '#EFEBE0',
     ink: '#0F0F0E',
     family: 'EB Garamond'
   },
@@ -53,22 +53,15 @@ export const PROFILES: Profile[] = [
     id: 'carbon',
     name: 'Carbon Inverted Slate',
     hint: 'Ink on black, night reading',
-    bg: '#171716',
+    paper: '#171716',
     ink: '#EAE6DC',
     family: 'STIX Two Text'
   }
 ];
 
-export const DEFAULT_PROFILE: ProfileId = 'remarkable';
+export const READING_SIZE = { min: 16, max: 24, step: 1, default: 19 };
 
-export const FONT_SIZE = { min: 16, max: 24, step: 1, default: 19 };
-
-/** How long the screen-refresh flash runs, in milliseconds. */
+/** How long the screen-refresh runs, in milliseconds. */
 export const REFRESH_MS = 420;
 
-/** Only article routes get the reader: /b/1, not /b and not /b/1/anything-else. */
-export function isArticlePath(pathname: string | null) {
-  if (!pathname) return false;
-  const segments = pathname.replace(/\/+$/, '').split('/').filter(Boolean);
-  return segments.length === 2 && segments[0] === 'b';
-}
+export const STORAGE_KEY = 'reading-theme';
