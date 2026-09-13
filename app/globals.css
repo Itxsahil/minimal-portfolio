@@ -223,3 +223,8 @@ li::before {
 .page-load-animation {
   animation: blurFadeIn 2s ease-out forwards;
 }
+/* The cat is scoped to the home page and the writings index; see
+   components/oneko.tsx for why hiding beats unloading. */
+html[data-oneko-hidden] #oneko {
+  display: none;
+}
