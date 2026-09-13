@@ -2,7 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { IBM_Plex_Mono, IBM_Plex_Sans_Devanagari, Inter, JetBrains_Mono, STIX_Two_Text } from 'next/font/google';
 import { ContactButton } from '@/components/form-toggle';
-import Script  from 'next/script';
+import { Oneko } from '@/components/oneko';
 import { Analytics } from '@vercel/analytics/next';
 const inter = Inter({ subsets: ['latin'] });
 const ibm_Mono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500', '600', '700'] });
@@ -66,7 +66,7 @@ export default function RootLayout({
           </main>
           <Footer />
         </div>
-        <Script src="/oneko/oneko.js" data-cat="/oneko/oneko.gif"/>
+        <Oneko />
         <Analytics />
         <ContactButton/>
       </body>
