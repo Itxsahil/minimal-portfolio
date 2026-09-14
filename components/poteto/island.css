@@ -1,0 +1,320 @@
+/* An in-browser recreation of poteto's dynamic island. Geometry follows the
+   real thing: the pill is a rounded capsule at idle, squares off to a 32px
+   radius as the control center, and 30px once a view is open. Transitions run
+   at 300ms, the same as the QML. */
+
+.poteto-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  min-height: 340px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--pt-border);
+  background:
+    radial-gradient(120% 90% at 50% -20%, var(--pt-tile), transparent 60%),
+    var(--pt-desk);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  color: var(--pt-text);
+  user-select: none;
+}
+
+/* Two dim window shapes, so the island has something to sit in front of. */
+.poteto-window {
+  position: absolute;
+  border-radius: 8px;
+  border: 1px solid var(--pt-border);
+  background: color-mix(in srgb, var(--pt-island) 70%, transparent);
+}
+
+.poteto-workspaces {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  display: flex;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--pt-island);
+  border: 1px solid var(--pt-border);
+}
+
+.poteto-ws {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--pt-dim);
+}
+
+.poteto-ws[data-active='true'] {
+  background: var(--pt-accent);
+}
+
+/* ---------- the island ---------- */
+
+.poteto-island {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  /* The shell's real pixel widths, clamped so the pill never grows wider than
+     the screen it is sitting on. */
+  width: min(var(--pt-w), calc(100% - 20px));
+  height: var(--pt-h);
+  border-radius: var(--pt-r);
+  background: var(--pt-island);
+  border: 1px solid var(--pt-border);
+  color: var(--pt-text);
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgb(0 0 0 / 0.35);
+  transition:
+    width 300ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    height 300ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-radius 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.poteto-island__body {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.poteto-view {
+  position: absolute;
+  inset: 0;
+  padding: 12px 16px;
+  opacity: 0;
+  transition: opacity 200ms ease;
+  pointer-events: none;
+}
+
+.poteto-view[data-shown='true'] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Idle row: wifi, clock, battery, unread dot — spacing 12, as in IdleContent. */
+.poteto-idle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 100%;
+}
+
+.poteto-clock {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.poteto-unread {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--pt-accent);
+}
+
+/* Control center */
+.poteto-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.poteto-tile {
+  border-radius: 10px;
+  background: var(--pt-tile);
+  padding: 8px 10px;
+  min-height: 52px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+}
+
+.poteto-tile__label {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pt-dim);
+}
+
+.poteto-tile__value {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.poteto-slider {
+  margin-top: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--pt-tile);
+  overflow: hidden;
+}
+
+.poteto-slider span {
+  display: block;
+  height: 100%;
+  background: var(--pt-accent);
+}
+
+/* Launcher */
+.poteto-search {
+  border-radius: 8px;
+  background: var(--pt-tile);
+  padding: 7px 10px;
+  font-size: 12px;
+  color: var(--pt-dim);
+}
+
+.poteto-result {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.poteto-result[data-selected='true'] {
+  background: var(--pt-accent);
+  color: var(--pt-on-accent);
+}
+
+.poteto-result__glyph {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: currentColor;
+  opacity: 0.55;
+}
+
+/* Theme grid */
+.poteto-swatches {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.poteto-swatch {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 6px;
+  font-size: 9.5px;
+  line-height: 1.25;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font-family: inherit;
+  background: var(--pt-tile);
+}
+
+.poteto-swatch[aria-pressed='true'] {
+  border-color: var(--pt-accent);
+}
+
+.poteto-swatch__dots {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 4px;
+}
+
+.poteto-swatch__dots i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+/* Power */
+.poteto-power {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.poteto-power__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--pt-tile);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pt-dim);
+}
+
+.poteto-power__key {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--pt-text);
+}
+
+/* ---------- the controls under the stage ---------- */
+
+.poteto-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.poteto-controls button {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.72rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgb(161 161 170 / 0.45);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.poteto-controls button[aria-pressed='true'] {
+  border-color: currentColor;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .poteto-island {
+    transition-duration: 1ms;
+  }
+}
+
+/* On a phone the tiles and swatches wrap, so each view gets the height it
+   actually needs rather than one scale factor applied to all of them. */
+@media (max-width: 460px) {
+  .poteto-island[data-view='control'] { height: 208px; }
+  .poteto-island[data-view='launcher'] { height: 200px; }
+  .poteto-island[data-view='themes'] { height: 232px; }
+  .poteto-island[data-view='power'] { height: 144px; }
+
+  .poteto-view {
+    padding: 10px 12px;
+  }
+
+  .poteto-tile {
+    min-height: 44px;
+    padding: 6px 8px;
+  }
+
+  .poteto-swatch {
+    font-size: 9px;
+    padding: 5px;
+  }
+
+  .poteto-power {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .poteto-power__item {
+    padding: 6px 8px;
+  }
+}

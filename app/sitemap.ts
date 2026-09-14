@@ -29,7 +29,7 @@ export default async function sitemap() {
     lastModified: new Date().toISOString(),
   }));
 
-  const routes = ["", "/b", "/work"].map((route) => ({
+  const routes = ["", "/b", "/p/poteto", "/work"].map((route) => ({
     url: `${SITE_URL}${route}`,
     lastModified: new Date().toISOString(),
   }));
