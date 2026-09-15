@@ -298,56 +298,43 @@ vec2 hash22(vec2 p) {
   return vec2(n, hash21(p + n));
 }
 
-// One lattice of stars. Every cell holds a candidate, most of them too faint
-// to light; the survivors get their own place, brightness and twitch rate.
-// The lattice has no edges, so the field is only as finite as the screen.
-float layer(vec2 uv, float density, float glow, float seed) {
+// One lattice of stars. Every cell holds a candidate; only those above the
+// cut light up, and the survivors take their place, brightness and behaviour
+// from the same hash. Neighbouring cells are checked too, so a star sits
+// anywhere in its cell and can spill across the edge. Confining them to the
+// middle of a cell is cheaper, and at these densities you can see the grid.
+float layer(vec2 uv, float density, float glow, float cut, float seed) {
   vec2 g = uv * density;
   vec2 cell = floor(g);
   vec2 f = fract(g) - 0.5;
 
   float acc = 0.0;
 
-  // the neighbouring cells too, so a star near an edge still spills over it
   for (int y = -1; y <= 1; y++) {
     for (int x = -1; x <= 1; x++) {
       vec2 o = vec2(float(x), float(y));
       vec2 id = cell + o + seed;
 
       float mag = hash21(id + 3.7);
-      if (mag < 0.70) continue;          // most of the sky is empty
+      if (mag < cut) continue;                 // most of the sky is empty
 
       vec2 at = hash22(id) - 0.5;
-      float bright = (mag - 0.70) / 0.30;
+      float bright = (mag - cut) / (1.0 - cut);
 
-      // every star keeps its own rhythm, so the field never pulses together
-      float twinkle = 0.55 + 0.45 * sin(u_time * (1.2 + mag * 7.0) + mag * 43.0);
+      // Scintillation is the air, not the star. Most hold steady; a few
+      // shimmer hard and a few more waver. Two detuned sines multiplied give
+      // an irregular flicker rather than a clean pulse.
+      float roll = hash21(id + 11.3);
+      float amount = roll > 0.86 ? 0.55 : (roll > 0.62 ? 0.20 : 0.0);
+      float s1 = sin(u_time * (1.7 + mag * 5.0) + mag * 43.0);
+      float s2 = sin(u_time * (2.9 + roll * 4.0) + roll * 17.0);
+      float flicker = 1.0 - amount * (0.5 - 0.5 * s1 * s2);
 
       float d = length(f - o - at);
-      acc += bright * twinkle * glow / (d * d + glow * 0.42);
+      acc += bright * flicker * glow / (d * d + glow * 0.42);
     }
   }
   return acc;
-}
-
-// The far lattices are packed tight enough that a star's glow never leaves
-// its own cell, so they skip the neighbourhood and cost a ninth as much.
-float dust(vec2 uv, float density, float radius, float amp, float seed) {
-  vec2 g = uv * density;
-  vec2 id = floor(g) + seed;
-  vec2 f = fract(g) - 0.5;
-
-  float mag = hash21(id + 3.7);
-  if (mag < 0.30) return 0.0;
-
-  // kept off the cell edge, which is what lets the single lookup be correct
-  vec2 at = (hash22(id) - 0.5) * 0.7;
-  float d = length(f - at);
-
-  float twinkle = 0.45 + 0.55 * sin(u_time * (1.0 + mag * 9.0) + mag * 57.0);
-
-  // a soft disc rather than a spike: a spike this small falls between pixels
-  return (mag - 0.30) / 0.70 * twinkle * amp * smoothstep(radius, 0.0, d);
 }
 
 // soft noise, for the band of stars too distant to resolve
@@ -396,15 +383,19 @@ void main() {
   // the unresolved band, drifting very slowly
   float band = exp(-pow((uv.y - uv.x * 0.42 + 0.06) * 2.7, 2.0));
   float haze = fbm(uv * 3.4 + vec2(u_time * 0.01, 0.0));
-  sky += vec3(0.075, 0.080, 0.115) * band * (0.30 + 0.70 * haze);
+  sky += vec3(0.090, 0.096, 0.135) * band * (0.25 + 0.75 * haze);
 
-  // five lattices, near to far. the last three are packed close enough that
-  // they stop reading as points and start reading as powder
-  float s  = layer(uv,  11.0, 0.00060,   0.0);
-  s       += layer(uv,  27.0, 0.00026,  19.0) * 0.85;
-  s       += dust(uv,   72.0, 0.34, 0.55,  57.0);
-  s       += dust(uv,  165.0, 0.34, 0.40,  91.0);
-  s       += dust(uv,  390.0, 0.34, 0.28, 133.0);
+  // A real sky is not spread evenly, and past a certain distance the eye stops
+  // resolving points at all. So only three lattices are drawn, and the faintest
+  // is gated hard: it appears where the sky is genuinely rich and nowhere else.
+  // Everything beyond that is carried by the glow above, not by more dots.
+  float crowd = clamp(band * (0.30 + 0.70 * haze)
+                    + 0.35 * fbm(uv * 2.3 + 9.0) - 0.16, 0.0, 1.0);
+  crowd *= crowd;
+
+  float s  = layer(uv, 11.0, 0.00060, 0.70,  0.0);
+  s       += layer(uv, 27.0, 0.00040, 0.70, 19.0) * 0.80;
+  s       += layer(uv, 62.0, 0.00110, 0.56, 57.0) * crowd * 0.55;
 
   // stars are not all the same colour
   vec3 tint = mix(vec3(0.72, 0.82, 1.00), vec3(1.00, 0.90, 0.76),
@@ -443,7 +434,7 @@ export const SHADERS: Shader[] = [
   {
     slug: 'stars',
     title: 'Night sky',
-    note: 'Five lattices of stars, near to far. Every cell of every lattice holds a candidate star, and the ones bright enough to survive get their own position, colour and rate of twitch, so the sky never pulses in unison. The two nearest lattices check their neighbouring cells so a star can spill across an edge; the far three are packed tightly enough that they never need to, which is what makes the count affordable. The lattice has no edges, so the field is only as finite as your screen is. A meteor crosses every seventh second.',
+    note: 'Three lattices of stars, near to far, each cell holding a candidate. Twinkling is the atmosphere rather than the star, so most of them sit perfectly still and only a few per cent shimmer, driven by two detuned sines multiplied together so the flicker stays irregular. The faintest lattice is gated by a noise field so it appears only where the sky is genuinely rich, because a field spread evenly reads as film grain rather than as sky. Everything further away is carried by the band of unresolved light instead of by more dots, which is also how your eye handles it. A meteor crosses every seventh second.',
     source: stars
   },
   {
