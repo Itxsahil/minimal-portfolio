@@ -89,6 +89,16 @@ export function ShaderCanvas({ source, title }: { source: string; title: string 
     const uTime = gl.getUniformLocation(program, 'u_time');
     const uRes = gl.getUniformLocation(program, 'u_resolution');
 
+    // Up to eight live ripples, oldest overwritten first. Shaders that do not
+    // declare the uniform get a null location, and uploading to null is a
+    // no-op, so this costs the other shaders nothing.
+    const MAX_RIPPLES = 8;
+    const uRipples = gl.getUniformLocation(program, 'u_ripples[0]');
+    const ripples = new Float32Array(MAX_RIPPLES * 3);
+    for (let i = 0; i < MAX_RIPPLES; i++) ripples[i * 3 + 2] = -999;
+    let nextRipple = 0;
+    let nextAuto = 1.2;
+
     // Cap the pixel ratio: a fragment shader costs per pixel, and a retina
     // screen would otherwise quadruple the bill for no visible gain here.
     const dpr = Math.min(window.devicePixelRatio || 1, 1.75);
@@ -114,6 +124,47 @@ export function ShaderCanvas({ source, title }: { source: string; title: string 
     ro.observe(canvas);
     resize();
 
+    const interactive = uRipples !== null;
+
+    /** Drop a ripple at a point given in device pixels. */
+    const spawnAt = (x: number, y: number, at: number) => {
+      const i = nextRipple % MAX_RIPPLES;
+      ripples[i * 3] = x;
+      ripples[i * 3 + 1] = y;
+      ripples[i * 3 + 2] = at;
+      nextRipple++;
+    };
+
+    /** gl_FragCoord counts from the bottom-left, the pointer from the top. */
+    const spawnFromPointer = (clientX: number, clientY: number, at: number) => {
+      const rect = canvas.getBoundingClientRect();
+      spawnAt(
+        (clientX - rect.left) * dpr,
+        (rect.height - (clientY - rect.top)) * dpr,
+        at
+      );
+    };
+
+    let lastDrag = 0;
+    const onDown = (e: PointerEvent) =>
+      spawnFromPointer(e.clientX, e.clientY, elapsed);
+    const onMove = (e: PointerEvent) => {
+      // A trail while dragging, rate limited so a fast swipe does not use up
+      // every slot in a single frame.
+      if (e.pressure === 0 && e.pointerType === 'mouse' && e.buttons === 0) {
+        if (elapsed - lastDrag < 0.25) return;
+      } else if (elapsed - lastDrag < 0.08) return;
+      lastDrag = elapsed;
+      spawnFromPointer(e.clientX, e.clientY, elapsed);
+    };
+
+    if (interactive) {
+      canvas.addEventListener('pointerdown', onDown);
+      canvas.addEventListener('pointermove', onMove);
+      canvas.style.touchAction = 'pan-y';
+      canvas.style.cursor = 'crosshair';
+    }
+
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
     const start = performance.now();
     let frame = 0;
@@ -134,6 +185,20 @@ export function ShaderCanvas({ source, title }: { source: string; title: string 
       if (!active && elapsed > 0) return;
 
       resize();
+
+      if (interactive) {
+        // A drop now and then, so the water is alive before anyone touches it.
+        if (elapsed > nextAuto) {
+          spawnAt(
+            Math.random() * canvas.width,
+            Math.random() * canvas.height,
+            elapsed
+          );
+          nextAuto = elapsed + 2.2 + Math.random() * 2.0;
+        }
+        gl.uniform3fv(uRipples, ripples);
+      }
+
       gl.uniform1f(uTime, elapsed);
       gl.uniform2f(uRes, canvas.width, canvas.height);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -151,6 +216,8 @@ export function ShaderCanvas({ source, title }: { source: string; title: string 
       io.disconnect();
       ro.disconnect();
       canvas.removeEventListener('webglcontextlost', onLost);
+      canvas.removeEventListener('pointerdown', onDown);
+      canvas.removeEventListener('pointermove', onMove);
       gl.deleteProgram(program);
       gl.deleteBuffer(buffer);
       gl.getExtension('WEBGL_lose_context')?.loseContext();

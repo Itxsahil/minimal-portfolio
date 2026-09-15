@@ -40,9 +40,10 @@ export default function Shaders() {
         numbers.
       </p>
       <p className="text-gray-800 dark:text-zinc-300 tracking-tight">
-        Each one runs live. The source under it is the exact string being
-        compiled, not a transcription, so it cannot fall out of step with what
-        you are looking at.
+        Each one runs live, and the water responds to a click or a drag. The
+        source under each is the exact string being compiled, not a
+        transcription, so it cannot fall out of step with what you are looking
+        at.
       </p>
 
       {SHADERS.map((shader) => (

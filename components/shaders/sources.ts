@@ -213,6 +213,75 @@ void main() {
   gl_FragColor = vec4(col, 1.0);
 }`;
 
+const ripples = `precision highp float;
+
+uniform vec2  u_resolution;
+uniform float u_time;
+uniform vec3  u_ripples[8];   // xy: where it was dropped, z: when
+
+// the tiled floor of the pool, seen through the water
+vec3 poolFloor(vec2 p) {
+  vec2 cell = floor(p * 6.0);
+  float checker = mod(cell.x + cell.y, 2.0);
+  vec3 col = mix(vec3(0.10, 0.38, 0.45),
+                 vec3(0.07, 0.28, 0.37), checker);
+
+  vec2 g = abs(fract(p * 6.0) - 0.5);
+  col *= 1.0 - 0.40 * smoothstep(0.43, 0.5, max(g.x, g.y)); // grout
+  return col;
+}
+
+// height of the water, in square units
+float surface(vec2 p) {
+  // a slow swell, so the water is never completely still
+  float h = 0.5 * sin(p.x *  9.0 + u_time * 0.9)
+          + 0.4 * sin(p.y * 11.0 - u_time * 0.7)
+          + 0.3 * sin((p.x + p.y) * 7.0 + u_time * 1.3);
+  h *= 0.10;
+
+  float scale = min(u_resolution.x, u_resolution.y);
+
+  for (int i = 0; i < 8; i++) {
+    vec3 r = u_ripples[i];
+    float age = u_time - r.z;
+    if (r.z < 0.0 || age < 0.0 || age > 5.0) continue;
+
+    // one ring per drop, travelling outward and flattening as it goes
+    float d = distance(p, r.xy / scale);
+    float w = d - age * 0.42;
+
+    float envelope = exp(-age * 0.75) * exp(-abs(w) * 10.0);
+    h += 0.55 * sin(w * 48.0) * envelope;
+  }
+
+  return h;
+}
+
+void main() {
+  float scale = min(u_resolution.x, u_resolution.y);
+  vec2 p = gl_FragCoord.xy / scale;   // square units, so the tiles stay square
+
+  // the gradient of the height field is the tilt of the surface
+  float e  = 1.0 / scale;
+  float h  = surface(p);
+  float hx = surface(p + vec2(e, 0.0));
+  float hy = surface(p + vec2(0.0, e));
+  vec2 slope = vec2(hx - h, hy - h) / e;
+
+  // a tilted surface bends the view of the floor: refraction, cheaply
+  vec3 col = poolFloor(p + slope * 0.016);
+
+  // light glancing off the tilt
+  vec3 n = normalize(vec3(-slope * 0.09, 1.0));
+  vec3 l = normalize(vec3(0.45, 0.60, 0.65));
+  col += vec3(0.85, 0.95, 1.00) * pow(max(dot(n, l), 0.0), 22.0) * 1.3;
+
+  // the wave fronts themselves catch the light
+  col += vec3(0.35, 0.60, 0.66) * clamp(length(slope) * 0.055, 0.0, 1.0) * 0.8;
+
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
 export const SHADERS: Shader[] = [
   {
     slug: 'plasma',
@@ -231,6 +300,12 @@ export const SHADERS: Shader[] = [
     title: 'Voronoi cells',
     note: 'Each pixel finds its nearest and second-nearest scattered point. The difference between those two distances is near zero exactly on a cell border, which draws the lines without ever storing an edge.',
     source: voronoi
+  },
+  {
+    slug: 'ripples',
+    title: 'Water',
+    note: 'Click or drag on the water. Each touch starts a ring that travels outward and flattens as it goes, and the surface is the sum of every live ring plus a slow swell. The tilt of that surface bends the view of the tiled floor, which is the whole trick: there is no water, only a floor being looked at through a wobbly lens. A drop falls on its own every few seconds.',
+    source: ripples
   },
   {
     slug: 'raymarch',
