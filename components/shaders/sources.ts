@@ -282,6 +282,139 @@ void main() {
   gl_FragColor = vec4(col, 1.0);
 }`;
 
+const stars = `precision highp float;
+
+uniform vec2  u_resolution;
+uniform float u_time;
+
+float hash21(vec2 p) {
+  p = fract(p * vec2(123.34, 456.21));
+  p += dot(p, p + 45.32);
+  return fract(p.x * p.y);
+}
+
+vec2 hash22(vec2 p) {
+  float n = hash21(p);
+  return vec2(n, hash21(p + n));
+}
+
+// One lattice of stars. Every cell holds a candidate, most of them too faint
+// to light; the survivors get their own place, brightness and twitch rate.
+// The lattice has no edges, so the field is only as finite as the screen.
+float layer(vec2 uv, float density, float glow, float seed) {
+  vec2 g = uv * density;
+  vec2 cell = floor(g);
+  vec2 f = fract(g) - 0.5;
+
+  float acc = 0.0;
+
+  // the neighbouring cells too, so a star near an edge still spills over it
+  for (int y = -1; y <= 1; y++) {
+    for (int x = -1; x <= 1; x++) {
+      vec2 o = vec2(float(x), float(y));
+      vec2 id = cell + o + seed;
+
+      float mag = hash21(id + 3.7);
+      if (mag < 0.70) continue;          // most of the sky is empty
+
+      vec2 at = hash22(id) - 0.5;
+      float bright = (mag - 0.70) / 0.30;
+
+      // every star keeps its own rhythm, so the field never pulses together
+      float twinkle = 0.55 + 0.45 * sin(u_time * (1.2 + mag * 7.0) + mag * 43.0);
+
+      float d = length(f - o - at);
+      acc += bright * twinkle * glow / (d * d + glow * 0.42);
+    }
+  }
+  return acc;
+}
+
+// The far lattices are packed tight enough that a star's glow never leaves
+// its own cell, so they skip the neighbourhood and cost a ninth as much.
+float dust(vec2 uv, float density, float radius, float amp, float seed) {
+  vec2 g = uv * density;
+  vec2 id = floor(g) + seed;
+  vec2 f = fract(g) - 0.5;
+
+  float mag = hash21(id + 3.7);
+  if (mag < 0.30) return 0.0;
+
+  // kept off the cell edge, which is what lets the single lookup be correct
+  vec2 at = (hash22(id) - 0.5) * 0.7;
+  float d = length(f - at);
+
+  float twinkle = 0.45 + 0.55 * sin(u_time * (1.0 + mag * 9.0) + mag * 57.0);
+
+  // a soft disc rather than a spike: a spike this small falls between pixels
+  return (mag - 0.30) / 0.70 * twinkle * amp * smoothstep(radius, 0.0, d);
+}
+
+// soft noise, for the band of stars too distant to resolve
+float noise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash21(i), hash21(i + vec2(1.0, 0.0)), u.x),
+             mix(hash21(i + vec2(0.0, 1.0)), hash21(i + vec2(1.0, 1.0)), u.x), u.y);
+}
+
+float fbm(vec2 p) {
+  float v = 0.0, a = 0.5;
+  for (int i = 0; i < 4; i++) { v += a * noise(p); p *= 2.02; a *= 0.5; }
+  return v;
+}
+
+// one meteor, every seventh second, from wherever it likes
+float meteor(vec2 uv) {
+  float period = 7.0;
+  float k = floor(u_time / period);
+  float age = fract(u_time / period) * period;
+
+  vec2 from = (hash22(vec2(k, 3.1)) - vec2(0.5, 0.15)) * vec2(2.4, 1.3);
+  vec2 dir = normalize(vec2(-0.85, -0.38));
+
+  vec2 d = uv - (from + dir * age * 0.85);
+  float along = dot(d, -dir);
+  float across = length(d + dir * along);
+
+  float streak = exp(-across * 300.0) * exp(-max(along, 0.0) * 11.0);
+  float life = smoothstep(0.0, 0.12, age) * smoothstep(1.7, 0.7, age);
+  return streak * life * step(0.0, along);
+}
+
+void main() {
+  vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution)
+          / min(u_resolution.x, u_resolution.y);
+
+  float h = gl_FragCoord.y / u_resolution.y;
+
+  // night: deep blue overhead, a little warmth left near the ground
+  vec3 sky = mix(vec3(0.020, 0.026, 0.055), vec3(0.003, 0.005, 0.014), h);
+  sky += vec3(0.070, 0.042, 0.030) * pow(1.0 - h, 7.0);
+
+  // the unresolved band, drifting very slowly
+  float band = exp(-pow((uv.y - uv.x * 0.42 + 0.06) * 2.7, 2.0));
+  float haze = fbm(uv * 3.4 + vec2(u_time * 0.01, 0.0));
+  sky += vec3(0.075, 0.080, 0.115) * band * (0.30 + 0.70 * haze);
+
+  // five lattices, near to far. the last three are packed close enough that
+  // they stop reading as points and start reading as powder
+  float s  = layer(uv,  11.0, 0.00060,   0.0);
+  s       += layer(uv,  27.0, 0.00026,  19.0) * 0.85;
+  s       += dust(uv,   72.0, 0.34, 0.55,  57.0);
+  s       += dust(uv,  165.0, 0.34, 0.40,  91.0);
+  s       += dust(uv,  390.0, 0.34, 0.28, 133.0);
+
+  // stars are not all the same colour
+  vec3 tint = mix(vec3(0.72, 0.82, 1.00), vec3(1.00, 0.90, 0.76),
+                  0.5 + 0.5 * sin(uv.x * 6.3 + uv.y * 4.1));
+
+  vec3 col = sky + tint * s + vec3(0.9, 0.95, 1.0) * meteor(uv);
+
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
 export const SHADERS: Shader[] = [
   {
     slug: 'plasma',
@@ -306,6 +439,12 @@ export const SHADERS: Shader[] = [
     title: 'Water',
     note: 'Click or drag on the water. Each touch starts a ring that travels outward and flattens as it goes, and the surface is the sum of every live ring plus a slow swell. The tilt of that surface bends the view of the tiled floor, which is the whole trick: there is no water, only a floor being looked at through a wobbly lens. A drop falls on its own every few seconds.',
     source: ripples
+  },
+  {
+    slug: 'stars',
+    title: 'Night sky',
+    note: 'Five lattices of stars, near to far. Every cell of every lattice holds a candidate star, and the ones bright enough to survive get their own position, colour and rate of twitch, so the sky never pulses in unison. The two nearest lattices check their neighbouring cells so a star can spill across an edge; the far three are packed tightly enough that they never need to, which is what makes the count affordable. The lattice has no edges, so the field is only as finite as your screen is. A meteor crosses every seventh second.',
+    source: stars
   },
   {
     slug: 'raymarch',
