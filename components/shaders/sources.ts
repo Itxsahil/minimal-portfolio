@@ -406,6 +406,171 @@ void main() {
   gl_FragColor = vec4(col, 1.0);
 }`;
 
+const typewriter = `precision highp float;
+
+uniform vec2  u_resolution;
+uniform float u_time;
+
+float hash21(vec2 p) {
+  p = fract(p * vec2(123.34, 456.21));
+  p += dot(p, p + 45.32);
+  return fract(p.x * p.y);
+}
+
+float sdCapsule(vec2 p, vec2 a, vec2 b, float r) {
+  vec2 pa = p - a, ba = b - a;
+  float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+  return length(pa - ba * h) - r;
+}
+
+float sdBox(vec2 p, vec2 b) {
+  vec2 d = abs(p) - b;
+  return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
+}
+
+const int   ARMS     = 9;    // typebars in the basket
+const int   COLS     = 26;   // characters per line
+const float CHAR_T   = 0.15; // average time per keystroke
+const float STRIKE_T = 0.11; // how long one strike takes, start to rest
+const float CR_PAUSE = 0.55; // dwell after the carriage snaps back
+
+void main() {
+  vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution) / min(u_resolution.x, u_resolution.y);
+  float halfW = u_resolution.x / min(u_resolution.x, u_resolution.y);
+
+  // ---- typing schedule ---------------------------------------------------
+  // A line is not typed at a constant rate: real keystrokes land unevenly,
+  // with the odd longer gap for a space. Rather than storing history, every
+  // column's duration is re-derived from a hash of (row, column), and a
+  // single pass sums them to find which one owns the current instant.
+  float typeNominal = float(COLS) * CHAR_T;
+  float rowPeriod = typeNominal + CR_PAUSE;
+  float rowFloat = u_time / rowPeriod;
+  float row = floor(rowFloat);
+  float localT = fract(rowFloat) * rowPeriod;
+  bool  typing = localT < typeNominal;
+  float crPhase = clamp((localT - typeNominal) / CR_PAUSE, 0.0, 1.0);
+
+  float acc = 0.0;
+  int   curCol = COLS - 1;
+  float colStart = 0.0;
+  for (int c = 0; c < COLS; c++) {
+    float durH = hash21(vec2(row * 7.13 + 1.0, float(c) * 3.71));
+    float dur = CHAR_T * mix(0.55, 1.85, durH);
+    float spH = hash21(vec2(row * 2.9 + 5.0, float(c) * 5.2));
+    if (spH > 0.82) dur += CHAR_T * 1.6;      // a word gap, every so often
+    if (localT < acc + dur) { curCol = c; colStart = acc; break; }
+    acc += dur;
+  }
+  float sinceStrike = max(localT - colStart, 0.0);
+  float strikePhase = clamp(sinceStrike / STRIKE_T, 0.0, 1.0);
+
+  // which of the nine typebars this keystroke belongs to
+  int curArm = int(floor(hash21(vec2(row * 11.7 + 2.0, float(curCol) * 4.3 + 1.0)) * float(ARMS)));
+
+  // carriage position: one step per struck column, eased into place as the
+  // strike lands, then a fast snap back to the margin once the line is done
+  float settled = float(curCol) + smoothstep(0.0, STRIKE_T * 0.6, sinceStrike);
+  float retEase = smoothstep(0.0, 0.32, crPhase);
+  float carriage = typing ? settled : mix(float(COLS), 0.0, retEase);
+
+  float PITCH = (2.0 * halfW * 0.84) / float(COLS);
+
+  // the line just finished lifts toward the platen and fades as it scrolls away
+  float lift = typing ? 0.0 : retEase;
+  float fade = typing ? 1.0 : (1.0 - smoothstep(0.35, 1.0, retEase));
+
+  // ---- machine geometry, all signed distances, unioned together ---------
+  float PLATEN_Y = 0.52;
+  float PRINT_Y  = 0.13;
+  vec2  HUB    = vec2(0.0, -0.42);
+  vec2  STRIKE = vec2(0.0, PRINT_Y - 0.02);
+
+  float d = 1e9;
+  for (int i = 0; i < ARMS; i++) {
+    float t = float(i) / float(ARMS - 1);
+    float ang = mix(-1.05, 1.05, t);
+    vec2 rest = HUB + vec2(sin(ang) * 0.30, -0.22 - 0.05 * cos(ang));
+    vec2 tipAt = STRIKE + vec2(sin(ang) * 0.05, 0.0);
+
+    // only the bar assigned to this keystroke moves; the rest sit still,
+    // because only one key is ever down at a time
+    float swing = 0.0;
+    if (i == curArm) {
+      swing = smoothstep(0.0, 0.3, strikePhase) * (1.0 - smoothstep(0.3, 1.0, strikePhase));
+    }
+    vec2 tip = mix(rest, tipAt, swing);
+
+    d = min(d, sdCapsule(uv, HUB, tip, 0.013));
+    d = min(d, length(uv - tip) - 0.020);      // the type slug
+  }
+
+  d = min(d, length(uv - HUB) - 0.055);                                   // hub
+  d = min(d, sdCapsule(uv, vec2(-halfW * 0.90, -0.55), vec2(-halfW * 0.90, PLATEN_Y - 0.10), 0.018));
+  d = min(d, sdCapsule(uv, vec2( halfW * 0.90, -0.55), vec2( halfW * 0.90, PLATEN_Y - 0.10), 0.018));
+  d = min(d, sdBox(uv - vec2(0.0, -0.70), vec2(halfW * 0.98, 0.10)) - 0.02); // base plate
+  float platen = sdCapsule(uv, vec2(-halfW * 0.92, PLATEN_Y), vec2(halfW * 0.92, PLATEN_Y), 0.16);
+  d = min(d, platen);
+
+  // ---- shading -------------------------------------------------------------
+  vec3 paper = vec3(0.965, 0.950, 0.905);
+  paper += (hash21(floor(gl_FragCoord.xy * 0.7)) - 0.5) * 0.02; // paper fibre, static
+  paper -= 0.05 * smoothstep(0.6, 1.3, length(uv * vec2(1.0 / halfW, 1.0)));
+
+  vec3 metal = vec3(0.10, 0.095, 0.105);
+  float fill = smoothstep(0.010, -0.004, d);
+  float shadow = smoothstep(0.05, -0.02, d) * 0.5;
+  vec3 col = mix(paper - shadow * 0.15, metal, fill);
+
+  float rim = smoothstep(0.006, -0.006, d) - smoothstep(-0.006, -0.014, d);
+  col += rim * 0.25;
+
+  float pf = clamp((uv.y - (PLATEN_Y - 0.16)) / 0.32, 0.0, 1.0);
+  float cyl = 1.0 - abs(pf - 0.5) * 2.0;
+  col = mix(col, col + cyl * 0.10, smoothstep(0.012, -0.012, platen));
+
+  // ---- ink stamped onto the page -------------------------------------------
+  // The strike point is fixed on screen; the paper is what moves. So a pixel's
+  // column is found by walking back from the current carriage position.
+  float colF = uv.x / PITCH + carriage;
+  float ci = floor(colF);
+  float cx = fract(colF) - 0.5;
+  int   colI = int(ci);
+
+  bool revealed = false;
+  if (typing) {
+    revealed = (colI >= 0 && colI < curCol) || (colI == curCol && strikePhase > 0.45);
+  } else {
+    revealed = colI >= 0 && colI < COLS;
+  }
+
+  if (revealed) {
+    float gh = hash21(vec2(row * 13.1 + 3.0, ci * 7.7 + 1.0));
+    if (gh < 0.80) { // ~1 in 5 columns is a space between words
+      float h2 = hash21(vec2(row * 4.4 + ci * 1.7, 9.0));
+      float h3 = hash21(vec2(ci * 2.3 + row, 17.0));
+      float gw = mix(0.42, 0.86, h2);
+      float gh_ = mix(0.09, 0.15, h3);
+      float gy  = mix(-0.015, 0.025, hash21(vec2(ci * 3.1, row * 5.3)));
+      vec2  gp  = vec2(cx * PITCH, uv.y - PRINT_Y - gy - lift * 0.10);
+      float glyph = sdBox(gp, vec2(gw * PITCH * 0.5, gh_ * 0.5)) - 0.004;
+      float ink = smoothstep(0.006, -0.004, glyph) * fade;
+      vec3 inkColor = vec3(0.10, 0.08, 0.12) * mix(0.8, 1.0, hash21(vec2(ci, row)));
+      col = mix(col, inkColor, ink);
+    }
+  }
+
+  // impact flash where the type slug lands, and the bell's glow on return
+  float impact = smoothstep(0.0, 0.15, strikePhase) * (1.0 - smoothstep(0.15, 0.5, strikePhase));
+  col += impact * 0.10 * exp(-length(uv - STRIKE) * 10.0);
+
+  float flash = typing ? 0.0 : exp(-crPhase * 16.0);
+  vec2 bellPos = vec2(halfW * 0.74, PLATEN_Y + 0.02);
+  col += flash * 0.5 * exp(-length(uv - bellPos) * 7.0) * vec3(1.0, 0.85, 0.55);
+
+  gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
+}`;
+
 export const SHADERS: Shader[] = [
   {
     slug: 'plasma',
@@ -442,5 +607,11 @@ export const SHADERS: Shader[] = [
     title: 'Raymarched sphere',
     note: 'Signed distance fields and sphere tracing. The scene is one function returning how far the nearest surface is, and the renderer walks along each ray by exactly that much. Normals come from the gradient, shadows from a second march toward the light.',
     source: raymarch
+  },
+  {
+    slug: 'typewriter',
+    title: 'Typewriter',
+    note: "Only one key is ever down at a time, so only one of the nine typebars ever swings: the rest sit still. A line is not typed at a constant rate, so no history is stored; each character's duration is re-derived from a hash of its row and column, and a single pass sums them to find which one owns this instant. The strike point stays fixed and the page is what moves, one step per keystroke, snapping back and fading into the platen when the carriage returns.",
+    source: typewriter
   }
 ];

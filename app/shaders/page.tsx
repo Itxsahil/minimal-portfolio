@@ -5,7 +5,7 @@ import { SHADERS } from '@/components/shaders/sources';
 
 const title = 'Shaders';
 const description =
-  'Four fragment shaders running in the browser, with the GLSL that produces them. Plasma, domain-warped noise, Voronoi cells and a raymarched sphere.';
+  'Seven fragment shaders running in the browser, with the GLSL that produces them. Plasma, domain-warped noise, Voronoi cells, water, a night sky, a raymarched sphere and a mechanical typewriter.';
 
 export const metadata: Metadata = {
   title,
