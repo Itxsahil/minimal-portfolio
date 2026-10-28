@@ -25,7 +25,7 @@ export const NameTransition = () => {
             className="block z-5 overflow-hidden rounded shadow-xl ring-1 ring-slate-900/5 relative bg-white h-30 w-30 cursor-pointer"
           >
             <Image
-              src="/bald.png"
+              src="/pfp.jpg"
               alt="Sahil Khan — Full-Stack Developer & Technical Writer"
               fill
               priority
@@ -78,7 +78,7 @@ export const NameTransition = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <Image
-                src="/bald.png"
+                src="/pfp.jpg"
                 alt="Sahil Khan"
                 fill
                 sizes="(max-width: 768px) 288px, 384px"
