@@ -26,6 +26,7 @@ export const NameTransition = () => {
           >
             <Image
               src="/pfp.jpg"
+              unoptimized
               alt="Sahil Khan — Full-Stack Developer & Technical Writer"
               fill
               priority
@@ -79,6 +80,7 @@ export const NameTransition = () => {
             >
               <Image
                 src="/pfp.jpg"
+                unoptimized
                 alt="Sahil Khan"
                 fill
                 sizes="(max-width: 768px) 288px, 384px"
