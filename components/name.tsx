@@ -18,7 +18,7 @@ export const NameTransition = () => {
   return (
     <>
       <span className="flex flex-col md:flex-row justify-end md:space-x-14 w-full mb-10">
-        <div className="relative shrink p-4 md:p-4 md:order-last order-first">
+        <div className="relative shrink p-4 md:p-4 -ml-4 md:ml-0 md:order-last order-first">
           <button
             type="button"
             onClick={() => setIsOpen(true)}
