@@ -1,11 +1,9 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { IBM_Plex_Mono, IBM_Plex_Sans_Devanagari, Inter, JetBrains_Mono, STIX_Two_Text } from 'next/font/google';
+import { IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google';
 import { ContactButton } from '@/components/form-toggle';
 import { Oneko } from '@/components/oneko';
 import { Analytics } from '@vercel/analytics/next';
-const inter = Inter({ subsets: ['latin'] });
-const ibm_Mono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500', '600', '700'] });
 export const metadata: Metadata = {
   title: "Sahil Khan – Full-Stack Developer & Technical Writer",
   description:
@@ -42,22 +40,24 @@ export const metadata: Metadata = {
   },
   metadataBase: new URL("https://www.sahilkhan.site"),
 };
-const stix = STIX_Two_Text({
+const plexSans = IBM_Plex_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-stix-two-text",
+  style: ["normal", "italic"],
+  variable: "--font-ibm-plex-sans",
 });
-const jetbrainsMono = JetBrains_Mono({
+const plexMono = IBM_Plex_Mono({
   subsets: ["latin"],
-  variable: "--font-mono",
-})
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-ibm-plex-mono",
+});
 export default function RootLayout({
   children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${stix.className} ${stix.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${plexSans.className} ${plexSans.variable} ${plexMono.variable}`} suppressHydrationWarning>
       <body className="antialiased">
         <div className="min-h-dvh overflow-x-clip flex flex-col justify-between pt-0 md:pt-8 p-8 dark:bg-neutral-900 bg-white text-gray-900 dark:text-zinc-200">
           

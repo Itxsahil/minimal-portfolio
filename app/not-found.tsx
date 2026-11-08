@@ -15,7 +15,7 @@ export default function NotFound() {
 
       <div className="relative">
         
-        <h1 className="text-6xl sm:text-8xl font-bold tracking-tighter font-[family-name:var(--font-stix-two-text)]">
+        <h1 className="text-6xl sm:text-8xl font-bold tracking-tighter">
           404
         </h1>
       </div>
