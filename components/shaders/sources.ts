@@ -406,6 +406,304 @@ void main() {
   gl_FragColor = vec4(col, 1.0);
 }`;
 
+const sunset = `precision highp float;
+
+uniform vec2 u_resolution;
+uniform float u_time;
+
+#define PI 3.14159265359
+
+// --------------------------------------------------
+// HASHING
+// --------------------------------------------------
+
+float hash21(vec2 p) {
+    p = fract(p * vec2(123.34, 456.21));
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+}
+
+vec2 hash22(vec2 p) {
+    float n = hash21(p);
+    return vec2(n, hash21(p + n));
+}
+
+// --------------------------------------------------
+// NOISE
+// --------------------------------------------------
+
+float noise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+
+    vec2 u = f * f * (3.0 - 2.0 * f);
+
+    return mix(
+        mix(hash21(i), hash21(i + vec2(1.0, 0.0)), u.x),
+        mix(hash21(i + vec2(0.0, 1.0)),
+            hash21(i + vec2(1.0, 1.0)), u.x),
+        u.y
+    );
+}
+
+float fbm(vec2 p) {
+    float v = 0.0;
+    float a = 0.5;
+
+    for (int i = 0; i < 6; i++) {
+        v += a * noise(p);
+        p *= 2.03;
+        a *= 0.5;
+    }
+
+    return v;
+}
+
+// --------------------------------------------------
+// CLOUD FIELD
+// --------------------------------------------------
+
+float cloudField(vec2 p) {
+
+    float large = fbm(p * 1.4);
+    float medium = fbm(p * 3.2 + 12.7);
+    float fine = fbm(p * 7.0 + 31.4);
+
+    return large * 0.60
+         + medium * 0.28
+         + fine * 0.12;
+}
+
+// --------------------------------------------------
+// ATMOSPHERIC GRADIENT
+// --------------------------------------------------
+
+vec3 atmosphere(float h) {
+
+    vec3 horizon = vec3(1.00, 0.48, 0.29);
+    vec3 sunset  = vec3(0.87, 0.29, 0.31);
+    vec3 rose    = vec3(0.48, 0.22, 0.40);
+    vec3 violet  = vec3(0.20, 0.16, 0.34);
+    vec3 zenith  = vec3(0.075, 0.105, 0.24);
+
+    vec3 col = mix(horizon, sunset, smoothstep(0.0, 0.24, h));
+    col = mix(col, rose, smoothstep(0.24, 0.48, h));
+    col = mix(col, violet, smoothstep(0.48, 0.73, h));
+    col = mix(col, zenith, smoothstep(0.73, 1.0, h));
+
+    return col;
+}
+
+// --------------------------------------------------
+// SUN
+// --------------------------------------------------
+
+float sunDisc(vec2 p, vec2 center, float radius) {
+
+    float d = length(p - center);
+
+    return 1.0 - smoothstep(
+        radius * 0.96,
+        radius * 1.04,
+        d
+    );
+}
+
+float sunGlow(vec2 p, vec2 center) {
+
+    float d = length(p - center);
+
+    float inner = exp(-d * 7.0);
+    float outer = exp(-d * 2.0);
+
+    return inner * 0.55 + outer * 0.25;
+}
+
+// --------------------------------------------------
+// CLOUD LIGHTING
+// --------------------------------------------------
+
+vec3 cloudLighting(
+    float cloud,
+    float density,
+    float sunInfluence
+) {
+
+    vec3 shadow = vec3(0.19, 0.16, 0.28);
+
+    vec3 base = vec3(0.68, 0.39, 0.42);
+
+    vec3 illuminated = vec3(1.0, 0.68, 0.47);
+
+    vec3 col = mix(shadow, base, cloud);
+
+    col = mix(
+        col,
+        illuminated,
+        sunInfluence * density
+    );
+
+    return col;
+}
+
+// --------------------------------------------------
+// MAIN
+// --------------------------------------------------
+
+void main() {
+
+    vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+
+    vec2 p = (gl_FragCoord.xy - 0.5 * u_resolution)
+           / min(u_resolution.x, u_resolution.y);
+
+    float h = uv.y;
+
+    // Atmospheric sky
+    vec3 sky = atmosphere(h);
+
+    // Sun position
+    vec2 sunPos = vec2(
+        u_resolution.x / u_resolution.y * 0.50,
+        0.30
+    );
+
+    float sun = sunDisc(p, sunPos, 0.075);
+    float glow = sunGlow(p, sunPos);
+
+    // Atmospheric sunlight
+    sky += vec3(1.0, 0.42, 0.19) * glow;
+
+    sky += vec3(1.0, 0.25, 0.12)
+         * pow(glow, 2.0) * 0.35;
+
+    // --------------------------------------------------
+    // CLOUD MOVEMENT
+    // --------------------------------------------------
+
+    float wind = u_time * 0.012;
+
+    vec2 cloudUV = uv;
+
+    cloudUV.x += wind;
+
+    // Perspective: clouds appear smaller near horizon
+    cloudUV.y = (cloudUV.y - 0.30) * 1.5 + 0.30;
+
+    // --------------------------------------------------
+    // LARGE CLOUD FORMATIONS
+    // --------------------------------------------------
+
+    float clouds = cloudField(
+        cloudUV * vec2(3.5, 2.0)
+    );
+
+    // Cloud density threshold
+    float cloudMask = smoothstep(
+        0.43,
+        0.68,
+        clouds
+    );
+
+    // --------------------------------------------------
+    // CLOUD STRUCTURE
+    // --------------------------------------------------
+
+    float detail = fbm(
+        cloudUV * vec2(12.0, 7.0)
+        + vec2(wind * 2.0, 0.0)
+    );
+
+    cloudMask *= smoothstep(
+        0.30,
+        0.65,
+        detail + clouds * 0.7
+    );
+
+    // Clouds fade towards upper sky
+    float cloudFade = smoothstep(
+        0.10,
+        0.38,
+        h
+    );
+
+    cloudFade *= 1.0 - smoothstep(
+        0.76,
+        0.98,
+        h
+    );
+
+    cloudMask *= cloudFade;
+
+    // --------------------------------------------------
+    // SUNLIGHT ON CLOUDS
+    // --------------------------------------------------
+
+    float sunDistance = length(p - sunPos);
+
+    float sunInfluence = exp(
+        -sunDistance * 2.5
+    );
+
+    vec3 cloudColor = cloudLighting(
+        clouds,
+        cloudMask,
+        sunInfluence
+    );
+
+    // Cloud shadows
+    cloudColor *= mix(
+        0.72,
+        1.15,
+        detail
+    );
+
+    // Blend atmospheric clouds
+    sky = mix(
+        sky,
+        cloudColor,
+        cloudMask * 0.75
+    );
+
+    // --------------------------------------------------
+    // HORIZON HAZE
+    // --------------------------------------------------
+
+    float haze = exp(
+        -pow((h - 0.22) * 9.0, 2.0)
+    );
+
+    sky += vec3(1.0, 0.42, 0.24)
+         * haze * 0.16;
+
+    // --------------------------------------------------
+    // SUN DISC
+    // --------------------------------------------------
+
+    sky = mix(
+        sky,
+        vec3(1.0, 0.82, 0.59),
+        sun
+    );
+
+    // --------------------------------------------------
+    // ATMOSPHERIC VIGNETTE
+    // --------------------------------------------------
+
+    float vignette = 1.0 -
+        0.16 * length((uv - 0.5) * vec2(0.9, 0.7));
+
+    sky *= vignette;
+
+    // --------------------------------------------------
+    // FINAL
+    // --------------------------------------------------
+
+    sky = max(sky, vec3(0.0));
+
+    gl_FragColor = vec4(sky, 1.0);
+}`;
+
 export const SHADERS: Shader[] = [
   {
     slug: 'plasma',
@@ -430,6 +728,12 @@ export const SHADERS: Shader[] = [
     title: 'Water',
     note: 'Click or drag on the water. Each touch starts a ring that travels outward and flattens as it goes, and the surface is the sum of every live ring plus a slow swell. The tilt of that surface bends the view of the tiled floor, which is the whole trick: there is no water, only a floor being looked at through a wobbly lens. A drop falls on its own every few seconds.',
     source: ripples
+  },
+  {
+    slug: 'sunset',
+    title: 'Sunset',
+    note: 'A five-stop gradient from horizon orange to zenith blue, a sun with two layers of exponential glow, and clouds built from three scales of fractal noise drifting on a slow wind. Clouds near the sun pick up its light, and the rest fall back to a cool violet shadow.',
+    source: sunset
   },
   {
     slug: 'stars',
